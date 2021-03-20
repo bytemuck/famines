@@ -1,11 +1,14 @@
 use crate::*;
 
 pub trait Flags {
-    fn set_negative(&mut self);
     fn get_negative(&self) -> bool;
-
-    fn set_zero(&mut self);
     fn get_zero(&self) -> bool;
+    fn set_negative_a(&mut self);
+    fn set_zero_a(&mut self);
+    fn set_negative_x(&mut self);
+    fn set_zero_x(&mut self);
+    fn set_negative_y(&mut self);
+    fn set_zero_y(&mut self);
 }
 
 #[derive(Copy, Clone)]
@@ -47,7 +50,15 @@ pub const FLAG_ZERO: u8 = 0b0000_0010;
 pub const FLAG_CARRY: u8 = 0b0000_0001;
 
 impl Flags for Registers {
-    fn set_negative(&mut self) {
+    fn get_negative(&self) -> bool {
+        self.status & FLAG_NEGATIVE == FLAG_NEGATIVE
+    }
+
+    fn get_zero(&self) -> bool {
+        self.status & FLAG_ZERO == FLAG_ZERO
+    }
+
+    fn set_negative_a(&mut self) {
         if self.a & FLAG_NEGATIVE == FLAG_NEGATIVE {
             self.status |= FLAG_NEGATIVE
         } else {
@@ -55,11 +66,7 @@ impl Flags for Registers {
         }
     }
 
-    fn get_negative(&self) -> bool {
-        self.status & FLAG_NEGATIVE == FLAG_NEGATIVE
-    }
-
-    fn set_zero(&mut self) {
+    fn set_zero_a(&mut self) {
         if self.a == 0 {
             self.status |= FLAG_ZERO
         } else {
@@ -67,7 +74,35 @@ impl Flags for Registers {
         }
     }
 
-    fn get_zero(&self) -> bool {
-        self.status & FLAG_ZERO == FLAG_ZERO
+    fn set_negative_x(&mut self) {
+        if self.x & FLAG_NEGATIVE == FLAG_NEGATIVE {
+            self.status |= FLAG_NEGATIVE
+        } else {
+            self.status &= FLAG_NEGATIVE
+        }
+    }
+
+    fn set_zero_x(&mut self) {
+        if self.x == 0 {
+            self.status |= FLAG_ZERO
+        } else {
+            self.status &= !FLAG_ZERO
+        }
+    }
+
+    fn set_negative_y(&mut self) {
+        if self.y & FLAG_NEGATIVE == FLAG_NEGATIVE {
+            self.status |= FLAG_NEGATIVE
+        } else {
+            self.status &= FLAG_NEGATIVE
+        }
+    }
+
+    fn set_zero_y(&mut self) {
+        if self.y == 0 {
+            self.status |= FLAG_ZERO
+        } else {
+            self.status &= !FLAG_ZERO
+        }
     }
 }

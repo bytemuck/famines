@@ -31,13 +31,33 @@ impl Processor {
             match self.fetch_instruction(&mut cycles) {
                 (Instruction::LDA, InstructionInput::Immediate(value)) => {
                     self.registers.a = value;
-                    self.registers.set_zero();
-                    self.registers.set_negative();
+                    self.registers.set_zero_a();
+                    self.registers.set_negative_a();
                 }
                 (Instruction::LDA, InstructionInput::Address(address)) => {
                     self.registers.a = self.read_byte(&mut cycles, address);
-                    self.registers.set_zero();
-                    self.registers.set_negative();
+                    self.registers.set_zero_a();
+                    self.registers.set_negative_a();
+                }
+                (Instruction::LDX, InstructionInput::Immediate(value)) => {
+                    self.registers.x = value;
+                    self.registers.set_zero_x();
+                    self.registers.set_negative_x();
+                }
+                (Instruction::LDX, InstructionInput::Address(address)) => {
+                    self.registers.x = self.read_byte(&mut cycles, address);
+                    self.registers.set_zero_x();
+                    self.registers.set_negative_x();
+                }
+                (Instruction::LDY, InstructionInput::Immediate(value)) => {
+                    self.registers.y = value;
+                    self.registers.set_zero_y();
+                    self.registers.set_negative_y();
+                }
+                (Instruction::LDY, InstructionInput::Address(address)) => {
+                    self.registers.y = self.read_byte(&mut cycles, address);
+                    self.registers.set_zero_y();
+                    self.registers.set_negative_y();
                 }
                 (Instruction::JSR, InstructionInput::Address(address)) => {
                     self.memory.write_word(
@@ -100,7 +120,8 @@ impl Processor {
                     InstructionInput::Address(address as Word)
                 }
             },
-            AddressingMode::Indirect => match register {
+            AddressingMode::Indirect => InstructionInput::Unknown,
+            AddressingMode::IndexedIndirect => match register {
                 ImpliedRegister::None => InstructionInput::Unknown,
                 ImpliedRegister::X => {
                     let address = self.fetch_byte(cycles) + self.registers.x;
@@ -109,6 +130,11 @@ impl Processor {
 
                     InstructionInput::Address(address)
                 }
+                ImpliedRegister::Y => InstructionInput::Unknown,
+            },
+            AddressingMode::IndirectIndexed => match register {
+                ImpliedRegister::None => InstructionInput::Unknown,
+                ImpliedRegister::X => InstructionInput::Unknown,
                 ImpliedRegister::Y => {
                     let address = self.fetch_byte(cycles);
                     let address = self.read_word(cycles, address as Word);
@@ -143,11 +169,6 @@ impl Processor {
 
         *cycles -= 2;
         data
-    }
-
-    fn read_byte_zp(&mut self, cycles: &mut i32, address: Byte) -> Byte {
-        *cycles -= 1;
-        self.memory[address as Word]
     }
 
     fn read_byte(&mut self, cycles: &mut i32, address: Word) -> Byte {
