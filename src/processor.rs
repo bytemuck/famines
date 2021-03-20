@@ -28,46 +28,66 @@ impl Processor {
         let cycles_requested = cycles;
 
         while cycles > 0 {
-            match self.fetch_instruction(&mut cycles) {
-                (Instruction::LDA, InstructionInput::Immediate(value)) => {
+            match self.fetch_instruction() {
+                (Instruction::INC, InstructionInput::Address(address), instruction_cycles) => {
+                    let mut result = self.read_byte(address);
+                    result += 0x01;
+
+                    self.memory.write_byte(result, address);
+                    self.registers.set_zero(result);
+                    self.registers.set_negative(result);
+
+                    cycles -= instruction_cycles as i32;
+                }
+                (Instruction::LDA, InstructionInput::Immediate(value), instruction_cycles) => {
                     self.registers.a = value;
                     self.registers.set_zero_a();
                     self.registers.set_negative_a();
+
+                    cycles -= instruction_cycles as i32;
                 }
-                (Instruction::LDA, InstructionInput::Address(address)) => {
-                    self.registers.a = self.read_byte(&mut cycles, address);
+                (Instruction::LDA, InstructionInput::Address(address), instruction_cycles) => {
+                    self.registers.a = self.read_byte(address);
                     self.registers.set_zero_a();
                     self.registers.set_negative_a();
+
+                    cycles -= instruction_cycles as i32;
                 }
-                (Instruction::LDX, InstructionInput::Immediate(value)) => {
+                (Instruction::LDX, InstructionInput::Immediate(value), instruction_cycles) => {
                     self.registers.x = value;
                     self.registers.set_zero_x();
                     self.registers.set_negative_x();
+
+                    cycles -= instruction_cycles as i32;
                 }
-                (Instruction::LDX, InstructionInput::Address(address)) => {
-                    self.registers.x = self.read_byte(&mut cycles, address);
+                (Instruction::LDX, InstructionInput::Address(address), instruction_cycles) => {
+                    self.registers.x = self.read_byte(address);
                     self.registers.set_zero_x();
                     self.registers.set_negative_x();
+
+                    cycles -= instruction_cycles as i32;
                 }
-                (Instruction::LDY, InstructionInput::Immediate(value)) => {
+                (Instruction::LDY, InstructionInput::Immediate(value), instruction_cycles) => {
                     self.registers.y = value;
                     self.registers.set_zero_y();
                     self.registers.set_negative_y();
+
+                    cycles -= instruction_cycles as i32;
                 }
-                (Instruction::LDY, InstructionInput::Address(address)) => {
-                    self.registers.y = self.read_byte(&mut cycles, address);
+                (Instruction::LDY, InstructionInput::Address(address), instruction_cycles) => {
+                    self.registers.y = self.read_byte(address);
                     self.registers.set_zero_y();
                     self.registers.set_negative_y();
+
+                    cycles -= instruction_cycles as i32;
                 }
-                (Instruction::JSR, InstructionInput::Address(address)) => {
-                    self.memory.write_word(
-                        self.registers.pc - 1,
-                        self.registers.sp as Word,
-                        &mut cycles,
-                    );
+                (Instruction::JSR, InstructionInput::Address(address), instruction_cycles) => {
+                    self.memory
+                        .write_word(self.registers.pc - 1, self.registers.sp as Word);
                     self.registers.sp += 2;
                     self.registers.pc = address;
-                    cycles -= 1;
+
+                    cycles -= instruction_cycles as i32;
                 }
                 _ => {}
             }
@@ -76,46 +96,47 @@ impl Processor {
         cycles_requested - cycles
     }
 
-    fn fetch_instruction(&mut self, cycles: &mut i32) -> DecodedInstruction {
-        let code = self.fetch_byte(cycles);
-        let (instruction, mode, register) = INSTRUCTION_CODE[code as usize];
+    fn fetch_instruction(&mut self) -> DecodedInstruction {
+        let code = self.fetch_byte();
+        let (instruction, mode, register, cycles) = INSTRUCTION_CODE[code as usize];
+        let mut cycles = cycles;
 
         let input = match mode {
             AddressingMode::Unknown => InstructionInput::Unknown,
             AddressingMode::Accumulator => InstructionInput::Unknown,
-            AddressingMode::Immediate => InstructionInput::Immediate(self.fetch_byte(cycles)),
+            AddressingMode::Immediate => InstructionInput::Immediate(self.fetch_byte()),
             AddressingMode::Implied => InstructionInput::Unknown,
             AddressingMode::Relative => InstructionInput::Unknown,
-            AddressingMode::Absolute => match register {
-                ImpliedRegister::None => InstructionInput::Address(self.fetch_word(cycles)),
+            AddressingMode::Absolute(variant) => match register {
+                ImpliedRegister::None => InstructionInput::Address(self.fetch_word()),
                 ImpliedRegister::X => {
-                    let address = self.fetch_word(cycles);
+                    let address = self.fetch_word();
                     let address_x = address + self.registers.x as Word;
-                    if address_x - address >= 0xFF {
-                        *cycles -= 1;
+                    if address_x - address >= 0xFF && variant {
+                        cycles += 1;
                     }
 
                     InstructionInput::Address(address_x)
                 }
                 ImpliedRegister::Y => {
-                    let address = self.fetch_word(cycles);
+                    let address = self.fetch_word();
                     let address_y = address + self.registers.y as Word;
                     if address_y - address >= 0xFF {
-                        *cycles -= 1;
+                        cycles += 1;
                     }
 
                     InstructionInput::Address(address_y)
                 }
             },
             AddressingMode::ZeroPage => match register {
-                ImpliedRegister::None => InstructionInput::Address(self.fetch_byte(cycles) as Word),
+                ImpliedRegister::None => InstructionInput::Address(self.fetch_byte() as Word),
                 ImpliedRegister::X => {
-                    let address = self.fetch_byte(cycles);
+                    let address = self.fetch_byte();
                     let address = address.wrapping_add(self.registers.x);
                     InstructionInput::Address(address as Word)
                 }
                 ImpliedRegister::Y => {
-                    let address = self.fetch_byte(cycles);
+                    let address = self.fetch_byte();
                     let address = address.wrapping_add(self.registers.y);
                     InstructionInput::Address(address as Word)
                 }
@@ -124,24 +145,23 @@ impl Processor {
             AddressingMode::IndexedIndirect => match register {
                 ImpliedRegister::None => InstructionInput::Unknown,
                 ImpliedRegister::X => {
-                    let address = self.fetch_byte(cycles) + self.registers.x;
-                    let address = self.read_word(cycles, address as Word);
-                    *cycles -= 1;
+                    let address = self.fetch_byte() + self.registers.x;
+                    let address = self.read_word(address as Word);
 
                     InstructionInput::Address(address)
                 }
                 ImpliedRegister::Y => InstructionInput::Unknown,
             },
-            AddressingMode::IndirectIndexed => match register {
+            AddressingMode::IndirectIndexed(variant) => match register {
                 ImpliedRegister::None => InstructionInput::Unknown,
                 ImpliedRegister::X => InstructionInput::Unknown,
                 ImpliedRegister::Y => {
-                    let address = self.fetch_byte(cycles);
-                    let address = self.read_word(cycles, address as Word);
+                    let address = self.fetch_byte();
+                    let address = self.read_word(address as Word);
                     let address_y = address + self.registers.y as Word;
 
-                    if address_y - address >= 0xFF {
-                        *cycles -= 1;
+                    if address_y - address >= 0xFF && variant {
+                        cycles += 1;
                     }
 
                     InstructionInput::Address(address_y)
@@ -149,17 +169,16 @@ impl Processor {
             },
         };
 
-        (instruction, input)
+        (instruction, input, cycles)
     }
 
-    fn fetch_byte(&mut self, cycles: &mut i32) -> Byte {
+    fn fetch_byte(&mut self) -> Byte {
         let data = self.memory[self.registers.pc];
         self.registers.pc += 1;
-        *cycles -= 1;
         data
     }
 
-    fn fetch_word(&mut self, cycles: &mut i32) -> Word {
+    fn fetch_word(&mut self) -> Word {
         // 6502 is little endian
         let mut data = self.memory[self.registers.pc] as Word;
         self.registers.pc += 1;
@@ -167,18 +186,16 @@ impl Processor {
         data |= (self.memory[self.registers.pc] as Word) << 8;
         self.registers.pc += 1;
 
-        *cycles -= 2;
         data
     }
 
-    fn read_byte(&mut self, cycles: &mut i32, address: Word) -> Byte {
-        *cycles -= 1;
+    fn read_byte(&mut self, address: Word) -> Byte {
         self.memory[address]
     }
 
-    fn read_word(&mut self, cycles: &mut i32, address: Word) -> Word {
-        let low = self.read_byte(cycles, address);
-        let high = self.read_byte(cycles, address + 1);
+    fn read_word(&mut self, address: Word) -> Word {
+        let low = self.read_byte(address);
+        let high = self.read_byte(address + 1);
 
         low as Word | (high as Word) << 8
     }

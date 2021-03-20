@@ -24,10 +24,13 @@ impl Memory {
         self[address]
     }
 
-    pub fn write_word(&mut self, value: u16, address: u16, cycles: &mut i32) {
+    pub fn write_byte(&mut self, value: u8, address: u16) {
+        self[address] = value;
+    }
+
+    pub fn write_word(&mut self, value: u16, address: u16) {
         self[address] = (value & 0xFF) as u8;
         self[address + 1] = (value >> 8) as u8;
-        *cycles -= 2;
     }
 }
 

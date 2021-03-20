@@ -3,6 +3,8 @@ use crate::*;
 pub trait Flags {
     fn get_negative(&self) -> bool;
     fn get_zero(&self) -> bool;
+    fn set_negative(&mut self, value: u8);
+    fn set_zero(&mut self, value: u8);
     fn set_negative_a(&mut self);
     fn set_zero_a(&mut self);
     fn set_negative_x(&mut self);
@@ -56,6 +58,22 @@ impl Flags for Registers {
 
     fn get_zero(&self) -> bool {
         self.status & FLAG_ZERO == FLAG_ZERO
+    }
+
+    fn set_negative(&mut self, value: u8) {
+        if value & FLAG_NEGATIVE == FLAG_NEGATIVE {
+            self.status |= FLAG_NEGATIVE
+        } else {
+            self.status &= FLAG_NEGATIVE
+        }
+    }
+
+    fn set_zero(&mut self, value: u8) {
+        if value == 0 {
+            self.status |= FLAG_ZERO
+        } else {
+            self.status &= !FLAG_ZERO
+        }
     }
 
     fn set_negative_a(&mut self) {
