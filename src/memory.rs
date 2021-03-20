@@ -1,37 +1,46 @@
-const MAX_MEMORY_SIZE: u16 = u16::MAX;
+use crate::*;
 
+const MEMORY_SIZE: usize = 0xFFFF;
+
+#[derive(Copy, Clone)]
 pub struct Memory {
-    pub data: [u8; MAX_MEMORY_SIZE as usize],
+    bytes: [u8; MEMORY_SIZE],
+}
+
+impl Default for Memory {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl Memory {
     pub fn new() -> Self {
         Self {
-            data: [0; MAX_MEMORY_SIZE as usize],
+            bytes: [0; MEMORY_SIZE],
         }
     }
 
-    pub(crate) fn initialize(&mut self) {
-        self.data = [0; MAX_MEMORY_SIZE as usize];
+    pub fn get_byte(&self, address: Word) -> Byte {
+        self[address]
     }
 
-    pub fn write_u16(&mut self, value: u32, address: u32, cycles: &mut u32) {
-        self.data[address as usize]      = (value & 0xFF) as u8;
-        self.data[address as usize + 1]  = (value >> 8) as u8;
+    pub fn write_word(&mut self, value: u16, address: u16, cycles: &mut i32) {
+        self[address] = (value & 0xFF) as u8;
+        self[address + 1] = (value >> 8) as u8;
         *cycles -= 2;
     }
 }
 
-impl std::ops::Index<u16> for Memory {
-    type Output = u8;
+impl std::ops::Index<Word> for Memory {
+    type Output = Byte;
 
-    fn index(&self, index: u16) -> &<Self as std::ops::Index<u16>>::Output {
-        &self.data[index as usize]
+    fn index(&self, index: Word) -> &<Self as std::ops::Index<Word>>::Output {
+        &self.bytes[index as usize]
     }
 }
 
-impl std::ops::IndexMut<u16> for Memory {
-    fn index_mut(&mut self, index: u16) -> &mut <Self as std::ops::Index<u16>>::Output {
-        &mut self.data[index as usize]
+impl std::ops::IndexMut<Word> for Memory {
+    fn index_mut(&mut self, index: Word) -> &mut <Self as std::ops::Index<Word>>::Output {
+        &mut self.bytes[index as usize]
     }
 }

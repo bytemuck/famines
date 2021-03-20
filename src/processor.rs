@@ -2,120 +2,163 @@ use crate::*;
 
 #[derive(Copy, Clone)]
 pub struct Processor {
-    pub pc: u16, // Program Counter
-    pub sp: u16, // Stack Pointer
+    pub registers: Registers,
+    pub memory: Memory,
+}
 
-    pub a: u8, // Accumulator
-    pub x: u8, // Register X
-    pub y: u8, // Register Y
-
-    pub c: u8, // Carry Flag
-    pub z: u8, // Zero Flag
-    pub i: u8, // Interrupt Disable
-    pub d: u8, // Decimal Mode
-    pub b: u8, // Break Command
-    pub v: u8, // Overflow Flag
-    pub n: u8, // Negative Flag
+impl Default for Processor {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl Processor {
     pub fn new() -> Self {
         Self {
-            pc: 0,
-            sp: 0,
-
-            a: 0,
-            x: 0,
-            y: 0,
-
-            c: 0,
-            z: 0,
-            i: 0,
-            d: 0,
-            b: 0,
-            v: 0,
-            n: 0,
+            registers: Registers::new(),
+            memory: Memory::new(),
         }
     }
 
-    pub fn reset(&mut self, memory: &mut Memory) {
-        self.pc = 0xFFFC;
-        self.sp = 0x0100;
-
-        self.a = 0;
-        self.x = 0;
-        self.y = 0;
-
-        self.c = 0;
-        self.z = 0;
-        self.i = 0;
-        self.d = 0;
-        self.b = 0;
-        self.v = 0;
-        self.n = 0;
-
-        memory.initialize();
+    pub fn reset(&mut self) {
+        *self = Self::new();
     }
 
-    pub fn execute(&mut self, mut cycles: u32, memory: &mut Memory) -> u32 {
+    pub fn execute(&mut self, mut cycles: i32) -> i32 {
         let cycles_requested = cycles;
 
         while cycles > 0 {
-            match self.fetch_u8(&mut cycles, memory) {
-                LDA_IMMEDIATE => {
-                    self.a = self.fetch_u8(&mut cycles, memory);
-                    self.z = (self.a == 0) as u8;
-                    self.n = check_mask(self.a, 0b1000_0000) as u8;
+            match self.fetch_instruction(&mut cycles) {
+                (Instruction::LDA, InstructionInput::Immediate(value)) => {
+                    self.registers.a = value;
+                    self.registers.set_zero();
+                    self.registers.set_negative();
                 }
-                LDA_ZERO_PAGE => {
-                    let address = self.fetch_u8(&mut cycles, memory);
-                    self.a = self.read(&mut cycles, address, memory);
-                    self.z = (self.a == 0) as u8;
-                    self.n = check_mask(self.a, 0b1000_0000) as u8;
+                (Instruction::LDA, InstructionInput::Address(address)) => {
+                    self.registers.a = self.read_byte(&mut cycles, address);
+                    self.registers.set_zero();
+                    self.registers.set_negative();
                 }
-                LDA_ZERO_PAGE_X => {
-                    let mut address = self.fetch_u8(&mut cycles, memory);
-                    address = address.wrapping_add(self.x); // since it may overflow!
-                    cycles -= 1;
-                    self.a = self.read(&mut cycles, address, memory);
-                    self.z = (self.a == 0) as u8;
-                    self.n = check_mask(self.a, 0b1000_0000) as u8;
-                }
-                JSR_ABSOLUTE => {
-                    let sub_routine_address = self.fetch_u16(&mut cycles, memory);
-                    memory.write_u16((self.pc - 1) as u32, self.sp as u32, &mut cycles);
-                    self.pc = sub_routine_address;
+                (Instruction::JSR, InstructionInput::Address(address)) => {
+                    self.memory.write_word(
+                        self.registers.pc - 1,
+                        self.registers.sp as Word,
+                        &mut cycles,
+                    );
+                    self.registers.sp += 2;
+                    self.registers.pc = address;
                     cycles -= 1;
                 }
-                _ => { println!("Unknown instruction.") }
+                _ => {}
             }
         }
 
         cycles_requested - cycles
     }
 
-    fn fetch_u8(&mut self, cycles: &mut u32, memory: &mut Memory) -> u8 {
-        let data = memory[self.pc];
-        self.pc += 1;
+    fn fetch_instruction(&mut self, cycles: &mut i32) -> DecodedInstruction {
+        let code = self.fetch_byte(cycles);
+        let (instruction, mode, register) = INSTRUCTION_CODE[code as usize];
+
+        let input = match mode {
+            AddressingMode::Unknown => InstructionInput::Unknown,
+            AddressingMode::Accumulator => InstructionInput::Unknown,
+            AddressingMode::Immediate => InstructionInput::Immediate(self.fetch_byte(cycles)),
+            AddressingMode::Implied => InstructionInput::Unknown,
+            AddressingMode::Relative => InstructionInput::Unknown,
+            AddressingMode::Absolute => match register {
+                ImpliedRegister::None => InstructionInput::Address(self.fetch_word(cycles)),
+                ImpliedRegister::X => {
+                    let address = self.fetch_word(cycles);
+                    let address_x = address + self.registers.x as Word;
+                    if address_x - address >= 0xFF {
+                        *cycles -= 1;
+                    }
+
+                    InstructionInput::Address(address_x)
+                }
+                ImpliedRegister::Y => {
+                    let address = self.fetch_word(cycles);
+                    let address_y = address + self.registers.y as Word;
+                    if address_y - address >= 0xFF {
+                        *cycles -= 1;
+                    }
+
+                    InstructionInput::Address(address_y)
+                }
+            },
+            AddressingMode::ZeroPage => match register {
+                ImpliedRegister::None => InstructionInput::Address(self.fetch_byte(cycles) as Word),
+                ImpliedRegister::X => {
+                    let address = self.fetch_byte(cycles);
+                    let address = address.wrapping_add(self.registers.x);
+                    InstructionInput::Address(address as Word)
+                }
+                ImpliedRegister::Y => {
+                    let address = self.fetch_byte(cycles);
+                    let address = address.wrapping_add(self.registers.y);
+                    InstructionInput::Address(address as Word)
+                }
+            },
+            AddressingMode::Indirect => match register {
+                ImpliedRegister::None => InstructionInput::Unknown,
+                ImpliedRegister::X => {
+                    let address = self.fetch_byte(cycles) + self.registers.x;
+                    let address = self.read_word(cycles, address as Word);
+                    *cycles -= 1;
+
+                    InstructionInput::Address(address)
+                }
+                ImpliedRegister::Y => {
+                    let address = self.fetch_byte(cycles);
+                    let address = self.read_word(cycles, address as Word);
+                    let address_y = address + self.registers.y as Word;
+
+                    if address_y - address >= 0xFF {
+                        *cycles -= 1;
+                    }
+
+                    InstructionInput::Address(address_y)
+                }
+            },
+        };
+
+        (instruction, input)
+    }
+
+    fn fetch_byte(&mut self, cycles: &mut i32) -> Byte {
+        let data = self.memory[self.registers.pc];
+        self.registers.pc += 1;
         *cycles -= 1;
         data
     }
 
-    fn fetch_u16(&mut self, cycles: &mut u32, memory: &mut Memory) -> u16 {
+    fn fetch_word(&mut self, cycles: &mut i32) -> Word {
         // 6502 is little endian
-        let mut data = memory[self.pc] as u16;
-        self.pc += 1;
+        let mut data = self.memory[self.registers.pc] as Word;
+        self.registers.pc += 1;
 
-        data |= (memory[self.pc] as u16).rotate_left(8);
-        self.pc += 1;
+        data |= (self.memory[self.registers.pc] as Word) << 8;
+        self.registers.pc += 1;
 
         *cycles -= 2;
         data
     }
 
-    fn read(&mut self, cycles: &mut u32, address: u8, memory: &mut Memory) -> u8 {
-        let data = memory[address as u16];
+    fn read_byte_zp(&mut self, cycles: &mut i32, address: Byte) -> Byte {
         *cycles -= 1;
-        data
+        self.memory[address as Word]
+    }
+
+    fn read_byte(&mut self, cycles: &mut i32, address: Word) -> Byte {
+        *cycles -= 1;
+        self.memory[address]
+    }
+
+    fn read_word(&mut self, cycles: &mut i32, address: Word) -> Word {
+        let low = self.read_byte(cycles, address);
+        let high = self.read_byte(cycles, address + 1);
+
+        low as Word | (high as Word) << 8
     }
 }
