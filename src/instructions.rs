@@ -26,14 +26,8 @@ pub const LDY_ZERO_PAGE_X: u8 = 0xB4;
 pub const LDY_ABSOLUTE: u8 = 0xAC;
 pub const LDY_ABSOLUTE_X: u8 = 0xBC;
 
-pub type Byte = u8;
-pub type SignedByte = i8;
-pub type Word = u16;
-pub type SignedWord = i16;
-
 #[derive(Copy, Clone)]
-pub enum Instruction {
-    Unknown,
+pub(crate) enum Instruction {
     INC,
     JSR,
     LDA,
@@ -41,309 +35,273 @@ pub enum Instruction {
     LDY,
 }
 
-#[derive(Copy, Clone)]
-pub enum ImpliedRegister {
-    None,
-    X,
-    Y,
-}
-
+#[allow(dead_code)]
 #[derive(Copy, Clone, PartialEq, Eq)]
-pub enum AddressingMode {
-    Unknown,
-    Accumulator,
-    Immediate,
-    Implied,
-    Relative,
-    Absolute(bool), // true if variant cycles (+1 if page crossed)
-    ZeroPage,
-    Indirect,
-    IndexedIndirect,
-    IndirectIndexed(bool),
-}
-
-#[derive(Copy, Clone)]
-pub enum InstructionInput {
-    Unknown,
+pub(crate) enum AddrFuncResult {
     Implied,
     Immediate(Byte),
-    Relative(SignedByte),
+    Relative(Word),
     Address(Word),
 }
 
-pub type DecodedInstruction = (Instruction, InstructionInput, Byte);
+use crate::*;
+use Instruction::*;
 
-#[rustfmt::skip]
-pub static INSTRUCTION_CODE: [(Instruction, AddressingMode, ImpliedRegister, u8); 256] = [
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x00
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x01
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x02
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x03
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x04
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x05
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x06
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x07
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x08
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x09
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x0A
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x0B
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x0C
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x0D
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x0E
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x0F
-
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x10
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x11
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x12
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x13
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x14
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x15
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x16
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x17
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x18
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x19
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x1A
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x1B
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x1C
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x1D
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x1E
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x1F
-
-    (Instruction::JSR, AddressingMode::Absolute(true), ImpliedRegister::None, 6),      // 0x20
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x21
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x22
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x23
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x24
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x25
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x26
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x27
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x28
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x29
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x2A
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x2B
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x2C
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x2D
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x2E
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x2F
-
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x30
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x31
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x32
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x33
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x34
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x35
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x36
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x37
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x38
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x39
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x3A
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x3B
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x3C
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x3D
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x3E
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x3F
-
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x40
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x41
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x42
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x43
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x44
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x45
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x46
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x47
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x48
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x49
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x4A
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x4B
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x4C
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x4D
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x4E
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x4F
-
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x50
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x51
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x52
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x53
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x54
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x55
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x56
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x57
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x58
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x59
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x5A
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x5B
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x5C
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x5D
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x5E
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x5F
-
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x60
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x61
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x62
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x63
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x64
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x65
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x66
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x67
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x68
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x69
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x6A
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x6B
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x6C
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x6D
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x6E
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x6F
-
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x70
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x71
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x72
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x73
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x74
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x75
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x76
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x77
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x78
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x79
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x7A
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x7B
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x7C
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x7D
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x7E
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x7F
-
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x80
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x81
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x82
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x83
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x84
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x85
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x86
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x87
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x88
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x89
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x8A
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x8B
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x8C
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x8D
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x8E
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x8F
-
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x90
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x91
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x92
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x93
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x94
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x95
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x96
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x97
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x98
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x99
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x9A
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x9B
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x9C
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x9D
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x9E
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0x9F
-
-    (Instruction::LDY, AddressingMode::Immediate, ImpliedRegister::None, 2),           // 0xA0
-    (Instruction::LDA, AddressingMode::IndexedIndirect, ImpliedRegister::X, 6),        // 0xA1
-    (Instruction::LDX, AddressingMode::Immediate, ImpliedRegister::None, 2),           // 0xA2
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xA3
-    (Instruction::LDY, AddressingMode::ZeroPage, ImpliedRegister::None, 3),            // 0xA4
-    (Instruction::LDA, AddressingMode::ZeroPage, ImpliedRegister::None, 3),            // 0xA5
-    (Instruction::LDX, AddressingMode::ZeroPage, ImpliedRegister::None, 3),            // 0xA6
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xA7
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xA8
-    (Instruction::LDA, AddressingMode::Immediate, ImpliedRegister::None, 2),           // 0xA9
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xAA
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xAB
-    (Instruction::LDY, AddressingMode::Absolute(true), ImpliedRegister::None, 4),      // 0xAC
-    (Instruction::LDA, AddressingMode::Absolute(true), ImpliedRegister::None, 4),      // 0xAD
-    (Instruction::LDX, AddressingMode::Absolute(true), ImpliedRegister::None, 4),      // 0xAE
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xAF
-
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xB0
-    (Instruction::LDA, AddressingMode::IndirectIndexed(true), ImpliedRegister::Y, 5),  // 0xB1
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xB2
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xB3
-    (Instruction::LDY, AddressingMode::ZeroPage, ImpliedRegister::X, 4),               // 0xB4
-    (Instruction::LDA, AddressingMode::ZeroPage, ImpliedRegister::X, 4),               // 0xB5
-    (Instruction::LDX, AddressingMode::ZeroPage, ImpliedRegister::Y, 4),               // 0xB6
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xB7
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xB8
-    (Instruction::LDA, AddressingMode::Absolute(true), ImpliedRegister::Y, 4),         // 0xB9
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xBA
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xBB
-    (Instruction::LDY, AddressingMode::Absolute(true), ImpliedRegister::X, 4),         // 0xBC
-    (Instruction::LDA, AddressingMode::Absolute(true), ImpliedRegister::X, 4),         // 0xBD
-    (Instruction::LDX, AddressingMode::Absolute(true), ImpliedRegister::Y, 4),         // 0xBE
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xBF
-
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xC0
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xC1
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xC2
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xC3
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xC4
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xC5
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xC6
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xC7
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xC8
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xC9
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xCA
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xCB
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xCC
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xCD
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xCE
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xCF
-
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xD0
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xD1
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xD2
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xD3
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xD4
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xD5
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xD6
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xD7
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xD8
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xD9
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xDA
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xDB
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xDC
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xDD
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xDE
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xDF
-
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xE0
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xE1
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xE2
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xE3
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xE4
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xE5
-    (Instruction::INC, AddressingMode::ZeroPage, ImpliedRegister::None, 5),            // 0xE6
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xE7
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xE8
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xE9
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xEA
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xEB
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xEC
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xED
-    (Instruction::INC, AddressingMode::Absolute(false), ImpliedRegister::None, 6),     // 0xEE
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xEF
-
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xF0
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xF1
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xF2
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xF3
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xF4
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xF5
-    (Instruction::INC, AddressingMode::ZeroPage, ImpliedRegister::X, 6),               // 0xF6
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xF7
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xF8
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xF9
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xFA
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xFB
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xFC
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xFD
-    (Instruction::INC, AddressingMode::Absolute(false), ImpliedRegister::X, 7),        // 0xFE
-    (Instruction::Unknown, AddressingMode::Unknown, ImpliedRegister::None, 0),         // 0xFF
+pub(crate) const INSTRUCTION_CODE: [Option<(Instruction, AddrFunc, ExecFunc)>; 256] = [
+    None,                                                 // 0x00
+    None,                                                 // 0x01
+    None,                                                 // 0x02
+    None,                                                 // 0x03
+    None,                                                 // 0x04
+    None,                                                 // 0x05
+    None,                                                 // 0x06
+    None,                                                 // 0x07
+    None,                                                 // 0x08
+    None,                                                 // 0x09
+    None,                                                 // 0x0A
+    None,                                                 // 0x0B
+    None,                                                 // 0x0C
+    None,                                                 // 0x0D
+    None,                                                 // 0x0E
+    None,                                                 // 0x0F
+    None,                                                 // 0x10
+    None,                                                 // 0x11
+    None,                                                 // 0x12
+    None,                                                 // 0x13
+    None,                                                 // 0x14
+    None,                                                 // 0x15
+    None,                                                 // 0x16
+    None,                                                 // 0x17
+    None,                                                 // 0x18
+    None,                                                 // 0x19
+    None,                                                 // 0x1A
+    None,                                                 // 0x1B
+    None,                                                 // 0x1C
+    None,                                                 // 0x1D
+    None,                                                 // 0x1E
+    None,                                                 // 0x1F
+    Some((JSR, absolute, jsr)),                           // 0x20
+    None,                                                 // 0x21
+    None,                                                 // 0x22
+    None,                                                 // 0x23
+    None,                                                 // 0x24
+    None,                                                 // 0x25
+    None,                                                 // 0x26
+    None,                                                 // 0x27
+    None,                                                 // 0x28
+    None,                                                 // 0x29
+    None,                                                 // 0x2A
+    None,                                                 // 0x2B
+    None,                                                 // 0x2C
+    None,                                                 // 0x2D
+    None,                                                 // 0x2E
+    None,                                                 // 0x2F
+    None,                                                 // 0x30
+    None,                                                 // 0x31
+    None,                                                 // 0x32
+    None,                                                 // 0x33
+    None,                                                 // 0x34
+    None,                                                 // 0x35
+    None,                                                 // 0x36
+    None,                                                 // 0x37
+    None,                                                 // 0x38
+    None,                                                 // 0x39
+    None,                                                 // 0x3A
+    None,                                                 // 0x3B
+    None,                                                 // 0x3C
+    None,                                                 // 0x3D
+    None,                                                 // 0x3E
+    None,                                                 // 0x3F
+    None,                                                 // 0x40
+    None,                                                 // 0x41
+    None,                                                 // 0x42
+    None,                                                 // 0x43
+    None,                                                 // 0x44
+    None,                                                 // 0x45
+    None,                                                 // 0x46
+    None,                                                 // 0x47
+    None,                                                 // 0x48
+    None,                                                 // 0x49
+    None,                                                 // 0x4A
+    None,                                                 // 0x4B
+    None,                                                 // 0x4C
+    None,                                                 // 0x4D
+    None,                                                 // 0x4E
+    None,                                                 // 0x4F
+    None,                                                 // 0x50
+    None,                                                 // 0x51
+    None,                                                 // 0x52
+    None,                                                 // 0x53
+    None,                                                 // 0x54
+    None,                                                 // 0x55
+    None,                                                 // 0x56
+    None,                                                 // 0x57
+    None,                                                 // 0x58
+    None,                                                 // 0x59
+    None,                                                 // 0x5A
+    None,                                                 // 0x5B
+    None,                                                 // 0x5C
+    None,                                                 // 0x5D
+    None,                                                 // 0x5E
+    None,                                                 // 0x5F
+    None,                                                 // 0x60
+    None,                                                 // 0x61
+    None,                                                 // 0x62
+    None,                                                 // 0x63
+    None,                                                 // 0x64
+    None,                                                 // 0x65
+    None,                                                 // 0x66
+    None,                                                 // 0x67
+    None,                                                 // 0x68
+    None,                                                 // 0x69
+    None,                                                 // 0x6A
+    None,                                                 // 0x6B
+    None,                                                 // 0x6C
+    None,                                                 // 0x6D
+    None,                                                 // 0x6E
+    None,                                                 // 0x6F
+    None,                                                 // 0x70
+    None,                                                 // 0x71
+    None,                                                 // 0x72
+    None,                                                 // 0x73
+    None,                                                 // 0x74
+    None,                                                 // 0x75
+    None,                                                 // 0x76
+    None,                                                 // 0x77
+    None,                                                 // 0x78
+    None,                                                 // 0x79
+    None,                                                 // 0x7A
+    None,                                                 // 0x7B
+    None,                                                 // 0x7C
+    None,                                                 // 0x7D
+    None,                                                 // 0x7E
+    None,                                                 // 0x7F
+    None,                                                 // 0x80
+    None,                                                 // 0x81
+    None,                                                 // 0x82
+    None,                                                 // 0x83
+    None,                                                 // 0x84
+    None,                                                 // 0x85
+    None,                                                 // 0x86
+    None,                                                 // 0x87
+    None,                                                 // 0x88
+    None,                                                 // 0x89
+    None,                                                 // 0x8A
+    None,                                                 // 0x8B
+    None,                                                 // 0x8C
+    None,                                                 // 0x8D
+    None,                                                 // 0x8E
+    None,                                                 // 0x8F
+    None,                                                 // 0x90
+    None,                                                 // 0x91
+    None,                                                 // 0x92
+    None,                                                 // 0x93
+    None,                                                 // 0x94
+    None,                                                 // 0x95
+    None,                                                 // 0x96
+    None,                                                 // 0x97
+    None,                                                 // 0x98
+    None,                                                 // 0x99
+    None,                                                 // 0x9A
+    None,                                                 // 0x9B
+    None,                                                 // 0x9C
+    None,                                                 // 0x9D
+    None,                                                 // 0x9E
+    None,                                                 // 0x9F
+    Some((LDY, immediate, ldy)),                          // 0xA0
+    Some((LDA, indexed_indirect_x, lda)),                 // 0xA1
+    Some((LDX, immediate, ldx)),                          // 0xA2
+    None,                                                 // 0xA3
+    Some((LDY, zero_page, ldy)),                          // 0xA4
+    Some((LDA, zero_page, lda)),                          // 0xA5
+    Some((LDX, zero_page, ldx)),                          // 0xA6
+    None,                                                 // 0xA7
+    None,                                                 // 0xA8
+    Some((LDA, immediate, lda)),                          // 0xA9
+    None,                                                 // 0xAA
+    None,                                                 // 0xAB
+    Some((LDY, absolute, ldy)),                           // 0xAC
+    Some((LDA, absolute, lda)),                           // 0xAD
+    Some((LDX, absolute, ldx)),                           // 0xAE
+    None,                                                 // 0xAF
+    None,                                                 // 0xB0
+    Some((LDA, indirect_indexed_y_more_if_crossed, lda)), // 0xB1
+    None,                                                 // 0xB2
+    None,                                                 // 0xB3
+    Some((LDY, zero_page_x, ldy)),                        // 0xB4
+    Some((LDA, zero_page_x, lda)),                        // 0xB5
+    Some((LDX, zero_page_y, ldx)),                        // 0xB6
+    None,                                                 // 0xB7
+    None,                                                 // 0xB8
+    Some((LDA, absolute_y_more_if_crossed, lda)),         // 0xB9
+    None,                                                 // 0xBA
+    None,                                                 // 0xBB
+    Some((LDY, absolute_x_more_if_crossed, ldy)),         // 0xBC
+    Some((LDA, absolute_x_more_if_crossed, lda)),         // 0xBD
+    Some((LDX, absolute_y_more_if_crossed, ldx)),         // 0xBE
+    None,                                                 // 0xBF
+    None,                                                 // 0xC0
+    None,                                                 // 0xC1
+    None,                                                 // 0xC2
+    None,                                                 // 0xC3
+    None,                                                 // 0xC4
+    None,                                                 // 0xC5
+    None,                                                 // 0xC6
+    None,                                                 // 0xC7
+    None,                                                 // 0xC8
+    None,                                                 // 0xC9
+    None,                                                 // 0xCA
+    None,                                                 // 0xCB
+    None,                                                 // 0xCC
+    None,                                                 // 0xCD
+    None,                                                 // 0xCE
+    None,                                                 // 0xCF
+    None,                                                 // 0xD0
+    None,                                                 // 0xD1
+    None,                                                 // 0xD2
+    None,                                                 // 0xD3
+    None,                                                 // 0xD4
+    None,                                                 // 0xD5
+    None,                                                 // 0xD6
+    None,                                                 // 0xD7
+    None,                                                 // 0xD8
+    None,                                                 // 0xD9
+    None,                                                 // 0xDA
+    None,                                                 // 0xDB
+    None,                                                 // 0xDC
+    None,                                                 // 0xDD
+    None,                                                 // 0xDE
+    None,                                                 // 0xDF
+    None,                                                 // 0xE0
+    None,                                                 // 0xE1
+    None,                                                 // 0xE2
+    None,                                                 // 0xE3
+    None,                                                 // 0xE4
+    None,                                                 // 0xE5
+    Some((INC, zero_page, inc)),                          // 0xE6
+    None,                                                 // 0xE7
+    None,                                                 // 0xE8
+    None,                                                 // 0xE9
+    None,                                                 // 0xEA
+    None,                                                 // 0xEB
+    None,                                                 // 0xEC
+    None,                                                 // 0xED
+    Some((INC, absolute, inc)),                           // 0xEE
+    None,                                                 // 0xEF
+    None,                                                 // 0xF0
+    None,                                                 // 0xF1
+    None,                                                 // 0xF2
+    None,                                                 // 0xF3
+    None,                                                 // 0xF4
+    None,                                                 // 0xF5
+    Some((INC, zero_page_x, inc)),                        // 0xF6
+    None,                                                 // 0xF7
+    None,                                                 // 0xF8
+    None,                                                 // 0xF9
+    None,                                                 // 0xFA
+    None,                                                 // 0xFB
+    None,                                                 // 0xFC
+    None,                                                 // 0xFD
+    Some((INC, absolute_x, inc)),                         // 0xFE
+    None,                                                 // 0xFF
 ];

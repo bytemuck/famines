@@ -1,3 +1,5 @@
+#![allow(unused_imports)]
+
 pub mod instructions;
 pub use instructions::*;
 
@@ -10,6 +12,11 @@ pub use processor::*;
 pub mod registers;
 pub use registers::*;
 
-pub fn check_mask(byte: u8, mask: u8) -> bool {
-    byte & mask == mask
-}
+pub mod addr_func;
+pub use addr_func::*;
+
+pub mod exec_func;
+pub use exec_func::*;
+
+pub mod types;
+pub use types::*;

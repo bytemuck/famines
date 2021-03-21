@@ -7,10 +7,11 @@ fn lda_immediate() {
     processor.memory[0xFFFC] = LDA_IMMEDIATE;
     processor.memory[0xFFFD] = 0x42;
 
-    let used_cycles = processor.execute(2);
+    let expected_cycles = 2;
+    let used_cycles = processor.execute(expected_cycles);
 
     assert_eq!(processor.registers.a, 0x42);
-    assert_eq!(used_cycles, 2);
+    assert_eq!(used_cycles, expected_cycles);
 
     assert_eq!(processor.registers.get_zero(), false);
     assert_eq!(processor.registers.get_negative(), false);
@@ -24,10 +25,11 @@ fn lda_zero_page() {
     processor.memory[0xFFFD] = 0x42;
     processor.memory[0x42] = 0x84;
 
-    let used_cycles = processor.execute(3);
+    let expected_cycles = 3;
+    let used_cycles = processor.execute(expected_cycles);
 
     assert_eq!(processor.registers.a, 0x84);
-    assert_eq!(used_cycles, 3);
+    assert_eq!(used_cycles, expected_cycles);
 
     assert_eq!(processor.registers.get_zero(), false);
     assert_eq!(processor.registers.get_negative(), true);
@@ -43,10 +45,11 @@ fn lda_zero_page_x() {
     processor.memory[0xFFFD] = 0x80;
     processor.memory[0x007F] = 0x37;
 
-    let used_cycles = processor.execute(4);
+    let expected_cycles = 4;
+    let used_cycles = processor.execute(expected_cycles);
 
     assert_eq!(processor.registers.a, 0x37);
-    assert_eq!(used_cycles, 4);
+    assert_eq!(used_cycles, expected_cycles);
 
     assert_eq!(processor.registers.get_zero(), false);
     assert_eq!(processor.registers.get_negative(), false);
