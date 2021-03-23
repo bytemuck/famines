@@ -36,7 +36,7 @@ impl Processor {
 
     fn run_instruction(&mut self) {
         let code = self.fetch_byte();
-        if let Some((_, addr_func, exec_func)) = INSTRUCTION_CODE[code as usize] {
+        if let Some((exec_func, addr_func)) = INSTRUCTION_CODE[code as usize] {
             exec_func(addr_func(self), self);
         }
     }
