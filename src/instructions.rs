@@ -1,3 +1,12 @@
+pub const ADC_IMMEDIATE: u8 = 0x69;
+pub const ADC_ZERO_PAGE: u8 = 0x65;
+pub const ADC_ZERO_PAGE_X: u8 = 0x75;
+pub const ADC_ABSOLUTE: u8 = 0x6D;
+pub const ADC_ABSOLUTE_X: u8 = 0x7D;
+pub const ADC_ABSOLUTE_Y: u8 = 0x79;
+pub const ADC_INDIRECT_X: u8 = 0x61;
+pub const ADC_INDIRECT_Y: u8 = 0x71;
+
 pub const INC_ZERO_PAGE: u8 = 0xE6;
 pub const INC_ZERO_PAGE_X: u8 = 0xF6;
 pub const INC_ABSOLUTE: u8 = 0xEE;
@@ -135,35 +144,35 @@ pub(crate) const INSTRUCTION_CODE: [Option<(ExecFunc, AddrFunc)>; 256] = [
     None,                                            // 0x5E
     None,                                            // 0x5F
     None,                                            // 0x60
-    None,                                            // 0x61
+    Some((adc, indexed_indirect_x)),                 // 0x61
     None,                                            // 0x62
     None,                                            // 0x63
     None,                                            // 0x64
-    None,                                            // 0x65
+    Some((adc, zero_page)),                          // 0x65
     None,                                            // 0x66
     None,                                            // 0x67
     None,                                            // 0x68
-    None,                                            // 0x69
+    Some((adc, immediate)),                          // 0x69
     None,                                            // 0x6A
     None,                                            // 0x6B
     None,                                            // 0x6C
-    None,                                            // 0x6D
+    Some((adc, absolute)),                           // 0x6D
     None,                                            // 0x6E
     None,                                            // 0x6F
     None,                                            // 0x70
-    None,                                            // 0x71
+    Some((adc, indirect_indexed_y_more_if_crossed)), // 0x71
     None,                                            // 0x72
     None,                                            // 0x73
     None,                                            // 0x74
-    None,                                            // 0x75
+    Some((adc, zero_page_x)),                        // 0x75
     None,                                            // 0x76
     None,                                            // 0x77
     None,                                            // 0x78
-    None,                                            // 0x79
+    Some((adc, absolute_y_more_if_crossed)),         // 0x79
     None,                                            // 0x7A
     None,                                            // 0x7B
     None,                                            // 0x7C
-    None,                                            // 0x7D
+    Some((adc, absolute_x_more_if_crossed)),         // 0x7D
     None,                                            // 0x7E
     None,                                            // 0x7F
     None,                                            // 0x80

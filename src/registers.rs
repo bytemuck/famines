@@ -2,13 +2,21 @@ use crate::*;
 
 pub trait Flags {
     fn get_negative(&self) -> bool;
+    fn get_overflow(&self) -> bool;
     fn get_zero(&self) -> bool;
-    fn set_negative(&mut self, value: u8);
-    fn set_zero(&mut self, value: u8);
+    fn get_carry(&self) -> bool;
+
+    fn set_negative(&mut self, value: Byte);
+    fn set_zero(&mut self, value: Byte);
+    fn set_carry(&mut self, value: Word);
+
     fn set_negative_a(&mut self);
+    fn set_overflow_a(&mut self, value: Byte, before: Byte);
     fn set_zero_a(&mut self);
+
     fn set_negative_x(&mut self);
     fn set_zero_x(&mut self);
+
     fn set_negative_y(&mut self);
     fn set_zero_y(&mut self);
 }
@@ -29,7 +37,7 @@ impl Registers {
             a: 0x00,
             x: 0x00,
             y: 0x00,
-            sp: 0x00,
+            sp: 0xFF,
             pc: 0xFFFC,
             status: Byte::default(),
         }
@@ -56,8 +64,16 @@ impl Flags for Registers {
         self.status & FLAG_NEGATIVE == FLAG_NEGATIVE
     }
 
+    fn get_overflow(&self) -> bool {
+        self.status & FLAG_OVERFLOW == FLAG_OVERFLOW
+    }
+
     fn get_zero(&self) -> bool {
         self.status & FLAG_ZERO == FLAG_ZERO
+    }
+
+    fn get_carry(&self) -> bool {
+        self.status & FLAG_CARRY == FLAG_CARRY
     }
 
     fn set_negative(&mut self, value: u8) {
@@ -76,11 +92,27 @@ impl Flags for Registers {
         }
     }
 
+    fn set_carry(&mut self, value: Word) {
+        if value > 0xFF {
+            self.status |= FLAG_CARRY
+        } else {
+            self.status &= !FLAG_CARRY
+        }
+    }
+
     fn set_negative_a(&mut self) {
         if self.a & FLAG_NEGATIVE == FLAG_NEGATIVE {
             self.status |= FLAG_NEGATIVE
         } else {
             self.status &= FLAG_NEGATIVE
+        }
+    }
+
+    fn set_overflow_a(&mut self, value: Byte, before: Byte) {
+        if !((self.a ^ value) & 0x80) != 0 && ((self.a ^ before) & 0x80) != 0 {
+            self.status |= FLAG_OVERFLOW
+        } else {
+            self.status &= !FLAG_OVERFLOW
         }
     }
 
