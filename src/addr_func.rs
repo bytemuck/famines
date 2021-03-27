@@ -1,5 +1,9 @@
 use crate::*;
 
+pub(crate) fn accumulator(_: &mut Processor) -> AddrFuncResult {
+    AddrFuncResult::Implied
+}
+
 pub(crate) fn immediate(cpu: &mut Processor) -> AddrFuncResult {
     let result = cpu.fetch_byte();
 

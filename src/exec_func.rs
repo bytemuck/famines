@@ -5,23 +5,74 @@ pub(crate) fn adc(result: AddrFuncResult, cpu: &mut Processor) {
         AddrFuncResult::Immediate(v) => {
             let before = (v + cpu.registers.a + cpu.registers.get_carry() as Byte) as Word;
 
+            cpu.registers.a = (before & 0xFF) as Byte;
+
             cpu.registers.set_negative(before as Byte);
             cpu.registers.set_overflow_a(v, before as Byte);
             cpu.registers.set_zero(before as Byte);
-            cpu.registers.set_carry(before);
-
-            cpu.registers.a = (before & 0xFF) as Byte;
+            cpu.registers.set_carry(before > 0xFF);
         }
         AddrFuncResult::Address(addr) => {
             let v = cpu.read_byte(addr);
             let before = v as Word + cpu.registers.a as Word + cpu.registers.get_carry() as Word;
+            cpu.registers.set_carry(before > 0xFF);
+
+            cpu.registers.a = (before & 0xFF) as Byte;
 
             cpu.registers.set_negative(before as Byte);
             cpu.registers.set_overflow_a(v, before as Byte);
             cpu.registers.set_zero(before as Byte);
-            cpu.registers.set_carry(before);
+        }
+        _ => {}
+    }
+}
 
-            cpu.registers.a = (before & 0xFF) as Byte;
+pub(crate) fn and(result: AddrFuncResult, cpu: &mut Processor) {
+    match result {
+        AddrFuncResult::Immediate(v) => {
+            cpu.registers.a &= v;
+
+            cpu.registers.set_negative_a();
+            cpu.registers.set_zero_a();
+        }
+        AddrFuncResult::Address(addr) => {
+            let v = cpu.read_byte(addr);
+            cpu.registers.a &= v;
+
+            cpu.registers.set_negative_a();
+            cpu.registers.set_zero_a();
+        }
+        _ => {}
+    }
+}
+
+pub(crate) fn asl(result: AddrFuncResult, cpu: &mut Processor) {
+    match result {
+        AddrFuncResult::Implied => {
+            let mut before = cpu.registers.a;
+            cpu.registers.set_carry(before & FLAG_NEGATIVE > 0);
+
+            before <<= 1;
+            before &= 0xFF;
+            cpu.cycles += 1;
+
+            cpu.registers.set_negative(before);
+            cpu.registers.set_zero(before);
+
+            cpu.registers.a = before;
+        }
+        AddrFuncResult::Address(addr) => {
+            let mut value = cpu.read_byte(addr);
+            cpu.registers.set_carry(value & FLAG_NEGATIVE > 0);
+
+            value <<= 1;
+            value &= 0xFF;
+            cpu.cycles += 1;
+
+            cpu.registers.set_negative(value);
+            cpu.registers.set_zero(value);
+
+            cpu.write_byte(value, addr);
         }
         _ => {}
     }
