@@ -80,7 +80,7 @@ pub(crate) fn asl(result: AddrFuncResult, cpu: &mut Processor) {
 
 pub(crate) fn bcc(result: AddrFuncResult, cpu: &mut Processor) {
     if let AddrFuncResult::Relative(addr) = result {
-        cpu.branch_if(addr, !cpu.registers.get_carry());
+        cpu.branch_if(cpu.registers.get_carry() == false, addr);
     }
 }
 

@@ -81,7 +81,7 @@ impl Processor {
         self.write_byte((value >> 8) as u8, address + 1);
     }
 
-    pub fn branch_if(&mut self, offset: SByte, switch: bool) {
+    pub fn branch_if(&mut self, switch: bool, offset: SByte) {
         if switch {
             let pc_old = self.registers.pc;
             self.registers.pc += offset as u16;
