@@ -80,4 +80,17 @@ impl Processor {
         self.write_byte((value & 0xFF) as u8, address);
         self.write_byte((value >> 8) as u8, address + 1);
     }
+
+    pub fn branch_if(&mut self, offset: SByte, switch: bool) {
+        if switch {
+            let pc_old = self.registers.pc;
+            self.registers.pc += offset as u16;
+            self.cycles += 1;
+
+            let page_changed = (self.registers.pc >> 8) != (pc_old >> 8);
+            if page_changed {
+                self.cycles += 1;
+            }
+        }
+    }
 }

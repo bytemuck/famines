@@ -22,6 +22,8 @@ pub const ASL_ZERO_PAGE_X: u8 = 0x16;
 pub const ASL_ABSOLUTE: u8 = 0x0E;
 pub const ASL_ABSOLUTE_X: u8 = 0x1E;
 
+pub const BCC_RELATIVE: u8 = 0x90;
+
 pub const INC_ZERO_PAGE: u8 = 0xE6;
 pub const INC_ZERO_PAGE_X: u8 = 0xF6;
 pub const INC_ABSOLUTE: u8 = 0xEE;
@@ -55,7 +57,7 @@ pub const LDY_ABSOLUTE_X: u8 = 0xBC;
 pub(crate) enum AddrFuncResult {
     Implied,
     Immediate(Byte),
-    Relative(Word),
+    Relative(SByte),
     Address(Word),
 }
 
@@ -206,7 +208,7 @@ pub(crate) const INSTRUCTION_CODE: [Option<(ExecFunc, AddrFunc)>; 256] = [
     None,                                            // 0x8D
     None,                                            // 0x8E
     None,                                            // 0x8F
-    None,                                            // 0x90
+    Some((bcc, relative)),                                            // 0x90
     None,                                            // 0x91
     None,                                            // 0x92
     None,                                            // 0x93
