@@ -1,6 +1,8 @@
+use std::usize;
+
 use crate::*;
 
-const MEMORY_SIZE: usize = 0xFFFF;
+const MEMORY_SIZE: usize = 0xFFFF + 1;
 
 #[derive(Copy, Clone)]
 pub struct Memory {

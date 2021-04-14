@@ -27,7 +27,7 @@ pub struct Registers {
     pub x: Byte,
     pub y: Byte,
     pub sp: Byte,
-    pub pc: Word,
+    pub pc: Address,
     pub status: Byte,
 }
 
@@ -38,7 +38,7 @@ impl Registers {
             x: 0x00,
             y: 0x00,
             sp: 0xFF,
-            pc: 0xFFFC,
+            pc: Address(0xFFFC),
             status: Byte::default(),
         }
     }

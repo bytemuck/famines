@@ -80,7 +80,19 @@ pub(crate) fn asl(result: AddrFuncResult, cpu: &mut Processor) {
 
 pub(crate) fn bcc(result: AddrFuncResult, cpu: &mut Processor) {
     if let AddrFuncResult::Relative(addr) = result {
-        cpu.branch_if(cpu.registers.get_carry() == false, addr);
+        cpu.branch_if(!cpu.registers.get_carry(), addr);
+    }
+}
+
+pub(crate) fn bcs(result: AddrFuncResult, cpu: &mut Processor) {
+    if let AddrFuncResult::Relative(addr) = result {
+        cpu.branch_if(cpu.registers.get_carry(), addr);
+    }
+}
+
+pub(crate) fn beq(result: AddrFuncResult, cpu: &mut Processor) {
+    if let AddrFuncResult::Relative(addr) = result {
+        cpu.branch_if(cpu.registers.get_zero(), addr);
     }
 }
 
@@ -99,7 +111,10 @@ pub(crate) fn inc(result: AddrFuncResult, cpu: &mut Processor) {
 
 pub(crate) fn jsr(result: AddrFuncResult, cpu: &mut Processor) {
     if let AddrFuncResult::Address(addr) = result {
-        cpu.write_word(cpu.registers.pc - 1, cpu.registers.sp as Word);
+        cpu.write_word(
+            (cpu.registers.pc + AddressDiff(-1)).to_word(),
+            Address(cpu.registers.sp.into()),
+        );
         cpu.registers.sp -= 2;
         cpu.registers.pc = addr;
     }

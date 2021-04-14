@@ -1,3 +1,5 @@
+use std::ops::{Add, AddAssign};
+
 use crate::*;
 
 #[derive(Copy, Clone)]
@@ -44,50 +46,50 @@ impl Processor {
     pub fn fetch_byte(&mut self) -> Byte {
         let data = self.read_byte(self.registers.pc);
 
-        self.registers.pc += 1;
+        self.registers.pc += AddressDiff(0x01);
         data
     }
 
     pub fn fetch_word(&mut self) -> Word {
         // 6502 is little endian
         let mut data = self.read_byte(self.registers.pc) as Word;
-        self.registers.pc += 1;
+        self.registers.pc += AddressDiff(0x01);
 
         data |= (self.read_byte(self.registers.pc) as Word) << 8;
-        self.registers.pc += 1;
+        self.registers.pc += AddressDiff(0x01);
 
         data
     }
 
-    pub fn read_byte(&mut self, address: Word) -> Byte {
+    pub fn read_byte(&mut self, Address(address): Address) -> Byte {
         self.cycles += 1;
         self.memory[address]
     }
 
-    pub fn read_word(&mut self, address: Word) -> Word {
+    pub fn read_word(&mut self, address: Address) -> Word {
         let low = self.read_byte(address);
-        let high = self.read_byte(address + 1);
+        let high = self.read_byte(address + AddressDiff(0x01));
 
         low as Word | (high as Word) << 8
     }
 
-    pub fn write_byte(&mut self, value: u8, address: u16) {
-        self.memory[address] = value;
+    pub fn write_byte(&mut self, value: u8, address: Address) {
+        self.memory[address.to_word()] = value;
         self.cycles += 1;
     }
 
-    pub fn write_word(&mut self, value: u16, address: u16) {
+    pub fn write_word(&mut self, value: u16, address: Address) {
         self.write_byte((value & 0xFF) as u8, address);
-        self.write_byte((value >> 8) as u8, address + 1);
+        self.write_byte((value >> 8) as u8, address + AddressDiff(1));
     }
 
-    pub fn branch_if(&mut self, switch: bool, offset: SByte) {
+    pub fn branch_if(&mut self, switch: bool, offset: AddressDiff) {
         if switch {
             let pc_old = self.registers.pc;
-            self.registers.pc += offset as u16;
+            self.registers.pc += offset;
             self.cycles += 1;
 
-            let page_changed = (self.registers.pc >> 8) != (pc_old >> 8);
+            let page_changed = (self.registers.pc.to_word() >> 8) != (pc_old.to_word() >> 8);
             if page_changed {
                 self.cycles += 1;
             }
