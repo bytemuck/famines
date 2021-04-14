@@ -7,6 +7,7 @@ pub trait Flags {
     fn get_carry(&self) -> bool;
 
     fn set_negative(&mut self, value: Byte);
+    fn set_overflow(&mut self, switch: bool);
     fn set_zero(&mut self, value: Byte);
     fn set_carry(&mut self, switch: bool);
 
@@ -81,6 +82,14 @@ impl Flags for Registers {
             self.status |= FLAG_NEGATIVE
         } else {
             self.status &= FLAG_NEGATIVE
+        }
+    }
+
+    fn set_overflow(&mut self, switch: bool) {
+        if switch {
+            self.status |= FLAG_OVERFLOW
+        } else {
+            self.status &= !FLAG_OVERFLOW
         }
     }
 

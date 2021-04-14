@@ -28,6 +28,13 @@ pub const BCS_RELATIVE: u8 = 0xB0;
 
 pub const BEQ_RELATIVE: u8 = 0xF0;
 
+pub const BIT_ZERO_PAGE: u8 = 0x24;
+pub const BIT_ABSOLUTE: u8 = 0x2C;
+
+pub const BMI_RELATIVE: u8 = 0x30;
+
+pub const BNE_RELATIVE: u8 = 0xD0;
+
 pub const INC_ZERO_PAGE: u8 = 0xE6;
 pub const INC_ZERO_PAGE_X: u8 = 0xF6;
 pub const INC_ABSOLUTE: u8 = 0xEE;
@@ -103,7 +110,7 @@ pub(crate) const INSTRUCTION_CODE: [Option<(ExecFunc, AddrFunc)>; 256] = [
     Some((and, indexed_indirect_x)),                 // 0x21
     None,                                            // 0x22
     None,                                            // 0x23
-    None,                                            // 0x24
+    Some((bit, zero_page)),                          // 0x24
     Some((and, zero_page)),                          // 0x25
     None,                                            // 0x26
     None,                                            // 0x27
@@ -111,11 +118,11 @@ pub(crate) const INSTRUCTION_CODE: [Option<(ExecFunc, AddrFunc)>; 256] = [
     Some((and, immediate)),                          // 0x29
     None,                                            // 0x2A
     None,                                            // 0x2B
-    None,                                            // 0x2C
+    Some((bit, absolute)),                           // 0x2C
     Some((and, absolute)),                           // 0x2D
     None,                                            // 0x2E
     None,                                            // 0x2F
-    None,                                            // 0x30
+    Some((bmi, relative)),                           // 0x30
     Some((and, indirect_indexed_y_more_if_crossed)), // 0x31
     None,                                            // 0x32
     None,                                            // 0x33
@@ -275,7 +282,7 @@ pub(crate) const INSTRUCTION_CODE: [Option<(ExecFunc, AddrFunc)>; 256] = [
     None,                                            // 0xCD
     None,                                            // 0xCE
     None,                                            // 0xCF
-    None,                                            // 0xD0
+    Some((bne, relative)),                           // 0xD0
     None,                                            // 0xD1
     None,                                            // 0xD2
     None,                                            // 0xD3

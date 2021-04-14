@@ -96,6 +96,30 @@ pub(crate) fn beq(result: AddrFuncResult, cpu: &mut Processor) {
     }
 }
 
+pub(crate) fn bit(result: AddrFuncResult, cpu: &mut Processor) {
+    if let AddrFuncResult::Address(addr) = result {
+        let result = cpu.read_byte(addr);
+
+        let anded = cpu.registers.a & result;
+        cpu.registers.set_zero(anded);
+
+        cpu.registers.set_negative(result);
+        cpu.registers.set_overflow(result & FLAG_OVERFLOW > 0)
+    }
+}
+
+pub(crate) fn bmi(result: AddrFuncResult, cpu: &mut Processor) {
+    if let AddrFuncResult::Relative(addr) = result {
+        cpu.branch_if(cpu.registers.get_negative(), addr);
+    }
+}
+
+pub(crate) fn bne(result: AddrFuncResult, cpu: &mut Processor) {
+    if let AddrFuncResult::Relative(addr) = result {
+        cpu.branch_if(!cpu.registers.get_zero(), addr);
+    }
+}
+
 pub(crate) fn inc(result: AddrFuncResult, cpu: &mut Processor) {
     if let AddrFuncResult::Address(addr) = result {
         let mut result = cpu.read_byte(addr);
