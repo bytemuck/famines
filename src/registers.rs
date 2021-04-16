@@ -9,12 +9,12 @@ pub trait Flags {
     fn get_zero(&self) -> bool;
     fn get_carry(&self) -> bool;
 
-    fn set_negative(&mut self, value: Byte);
+    fn set_negative(&mut self, switch: bool);
     fn set_overflow(&mut self, switch: bool);
     fn set_break(&mut self, switch: bool);
     fn set_decimal(&mut self, switch: bool);
     fn set_interrupt(&mut self, switch: bool);
-    fn set_zero(&mut self, value: Byte);
+    fn set_zero(&mut self, switch: bool);
     fn set_carry(&mut self, switch: bool);
 
     fn set_negative_a(&mut self);
@@ -95,8 +95,8 @@ impl Flags for Registers {
         self.status & FLAG_CARRY == FLAG_CARRY
     }
 
-    fn set_negative(&mut self, value: u8) {
-        if value & FLAG_NEGATIVE == FLAG_NEGATIVE {
+    fn set_negative(&mut self, switch: bool) {
+        if switch {
             self.status |= FLAG_NEGATIVE
         } else {
             self.status &= FLAG_NEGATIVE
@@ -135,8 +135,8 @@ impl Flags for Registers {
         }
     }
 
-    fn set_zero(&mut self, value: u8) {
-        if value == 0 {
+    fn set_zero(&mut self, switch: bool) {
+        if switch {
             self.status |= FLAG_ZERO
         } else {
             self.status &= !FLAG_ZERO
@@ -152,15 +152,15 @@ impl Flags for Registers {
     }
 
     fn set_negative_a(&mut self) {
-        if self.a & FLAG_NEGATIVE == FLAG_NEGATIVE {
+        if self.a & FLAG_NEGATIVE > 0 {
             self.status |= FLAG_NEGATIVE
         } else {
             self.status &= FLAG_NEGATIVE
         }
     }
 
-    fn set_overflow_a(&mut self, value: Byte, before: Byte) {
-        if !((self.a ^ value) & 0x80) != 0 && ((self.a ^ before) & 0x80) != 0 {
+    fn set_overflow_a(&mut self, before: Byte, after: Byte) {
+        if ((self.a ^ before) & 0x80) != 0 && !((self.a ^ after) & 0x80) != 0 {
             self.status |= FLAG_OVERFLOW
         } else {
             self.status &= !FLAG_OVERFLOW
@@ -176,7 +176,7 @@ impl Flags for Registers {
     }
 
     fn set_negative_x(&mut self) {
-        if self.x & FLAG_NEGATIVE == FLAG_NEGATIVE {
+        if self.x & FLAG_NEGATIVE > 0 {
             self.status |= FLAG_NEGATIVE
         } else {
             self.status &= FLAG_NEGATIVE
@@ -192,7 +192,7 @@ impl Flags for Registers {
     }
 
     fn set_negative_y(&mut self) {
-        if self.y & FLAG_NEGATIVE == FLAG_NEGATIVE {
+        if self.y & FLAG_NEGATIVE > 0 {
             self.status |= FLAG_NEGATIVE
         } else {
             self.status &= FLAG_NEGATIVE

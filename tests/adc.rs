@@ -432,7 +432,7 @@ fn adc_indirect_y_crosses() {
     processor.memory[0xFFFD] = 0x02;
     processor.memory[0x0002] = 0x02;
     processor.memory[0x0003] = 0x80;
-    processor.memory[0x8101] = 0x42; // 0x8000 + 0x04
+    processor.memory[0x8101] = 0x42; // 0x8002 + 0xFF
 
     let expected_cycles = 6;
     let used_cycles = processor.execute(expected_cycles);
@@ -454,7 +454,7 @@ fn adc_indirect_y_crosses_carry_off() {
     processor.memory[0xFFFD] = 0x02;
     processor.memory[0x0002] = 0x02;
     processor.memory[0x0003] = 0x80;
-    processor.memory[0x8101] = 0x42; // 0x8000 + 0x04
+    processor.memory[0x8101] = 0x42; // 0x8002 + 0xFF
 
     let expected_cycles = 6;
     let used_cycles = processor.execute(expected_cycles);

@@ -46,17 +46,17 @@ impl Processor {
     pub fn fetch_byte(&mut self) -> Byte {
         let data = self.read_byte(self.registers.pc);
 
-        self.registers.pc += AddressDiff(0x01);
+        self.registers.pc += RelativeAddress(0x01);
         data
     }
 
     pub fn fetch_word(&mut self) -> Word {
         // 6502 is little endian
         let mut data = self.read_byte(self.registers.pc) as Word;
-        self.registers.pc += AddressDiff(0x01);
+        self.registers.pc += RelativeAddress(0x01);
 
         data |= (self.read_byte(self.registers.pc) as Word) << 8;
-        self.registers.pc += AddressDiff(0x01);
+        self.registers.pc += RelativeAddress(0x01);
 
         data
     }
@@ -68,7 +68,7 @@ impl Processor {
 
     pub fn read_word(&mut self, address: Address) -> Word {
         let low = self.read_byte(address);
-        let high = self.read_byte(address + AddressDiff(0x01));
+        let high = self.read_byte(address + RelativeAddress(0x01));
 
         low as Word | (high as Word) << 8
     }
@@ -80,10 +80,10 @@ impl Processor {
 
     pub fn write_word(&mut self, value: u16, address: Address) {
         self.write_byte((value & 0xFF) as u8, address);
-        self.write_byte((value >> 8) as u8, address + AddressDiff(1));
+        self.write_byte((value >> 8) as u8, address + RelativeAddress(1));
     }
 
-    pub fn branch_if(&mut self, switch: bool, offset: AddressDiff) {
+    pub fn branch_if(&mut self, switch: bool, offset: RelativeAddress) {
         if switch {
             let pc_old = self.registers.pc;
             self.registers.pc += offset;

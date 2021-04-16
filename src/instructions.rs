@@ -47,6 +47,19 @@ pub const CLC_IMPLIED: u8 = 0x18;
 
 pub const CLD_IMPLIED: u8 = 0xD8;
 
+pub const CLI_IMPLIED: u8 = 0x58;
+
+pub const CLV_IMPLIED: u8 = 0xB8;
+
+pub const CMP_IMMEDIATE: u8 = 0xC9;
+pub const CMP_ZERO_PAGE: u8 = 0xC5;
+pub const CMP_ZERO_PAGE_X: u8 = 0xD5;
+pub const CMP_ABSOLUTE: u8 = 0xCD;
+pub const CMP_ABSOLUTE_X: u8 = 0xDD;
+pub const CMP_ABSOLUTE_Y: u8 = 0xD9;
+pub const CMP_INDIRECT_X: u8 = 0xC1;
+pub const CMP_INDIRECT_Y: u8 = 0xD1;
+
 pub const INC_ZERO_PAGE: u8 = 0xE6;
 pub const INC_ZERO_PAGE_X: u8 = 0xF6;
 pub const INC_ABSOLUTE: u8 = 0xEE;
@@ -79,7 +92,7 @@ pub const LDY_ABSOLUTE_X: u8 = 0xBC;
 pub(crate) enum AddrFuncResult {
     Implied,
     Immediate(Byte),
-    Relative(AddressDiff),
+    Relative(RelativeAddress),
     Address(Address),
 }
 
@@ -174,7 +187,7 @@ pub(crate) const INSTRUCTION_CODE: [Option<(ExecFunc, AddrFunc)>; 256] = [
     None,                                            // 0x55
     None,                                            // 0x56
     None,                                            // 0x57
-    None,                                            // 0x58
+    Some((cli, implied)),                            // 0x58
     None,                                            // 0x59
     None,                                            // 0x5A
     None,                                            // 0x5B
@@ -270,7 +283,7 @@ pub(crate) const INSTRUCTION_CODE: [Option<(ExecFunc, AddrFunc)>; 256] = [
     Some((lda, zero_page_x)),                        // 0xB5
     Some((ldx, zero_page_y)),                        // 0xB6
     None,                                            // 0xB7
-    None,                                            // 0xB8
+    Some((clv, implied)),                            // 0xB8
     Some((lda, absolute_y_more_if_crossed)),         // 0xB9
     None,                                            // 0xBA
     None,                                            // 0xBB
@@ -279,35 +292,35 @@ pub(crate) const INSTRUCTION_CODE: [Option<(ExecFunc, AddrFunc)>; 256] = [
     Some((ldx, absolute_y_more_if_crossed)),         // 0xBE
     None,                                            // 0xBF
     None,                                            // 0xC0
-    None,                                            // 0xC1
+    Some((cmp, indexed_indirect_x)),                 // 0xC1
     None,                                            // 0xC2
     None,                                            // 0xC3
     None,                                            // 0xC4
-    None,                                            // 0xC5
+    Some((cmp, zero_page)),                          // 0xC5
     None,                                            // 0xC6
     None,                                            // 0xC7
     None,                                            // 0xC8
-    None,                                            // 0xC9
+    Some((cmp, immediate)),                          // 0xC9
     None,                                            // 0xCA
     None,                                            // 0xCB
     None,                                            // 0xCC
-    None,                                            // 0xCD
+    Some((cmp, absolute)),                           // 0xCD
     None,                                            // 0xCE
     None,                                            // 0xCF
     Some((bne, relative)),                           // 0xD0
-    None,                                            // 0xD1
+    Some((cmp, indirect_indexed_y_more_if_crossed)), // 0xD1
     None,                                            // 0xD2
     None,                                            // 0xD3
     None,                                            // 0xD4
-    None,                                            // 0xD5
+    Some((cmp, zero_page_x)),                        // 0xD5
     None,                                            // 0xD6
     None,                                            // 0xD7
     Some((cld, implied)),                            // 0xD8
-    None,                                            // 0xD9
+    Some((cmp, absolute_y_more_if_crossed)),         // 0xD9
     None,                                            // 0xDA
     None,                                            // 0xDB
     None,                                            // 0xDC
-    None,                                            // 0xDD
+    Some((cmp, absolute_x_more_if_crossed)),         // 0xDD
     None,                                            // 0xDE
     None,                                            // 0xDF
     None,                                            // 0xE0

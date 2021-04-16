@@ -13,7 +13,7 @@ pub(crate) fn immediate(cpu: &mut Processor) -> AddrFuncResult {
 pub(crate) fn relative(cpu: &mut Processor) -> AddrFuncResult {
     let result = cpu.fetch_byte() as SByte;
 
-    AddrFuncResult::Relative(AddressDiff(result))
+    AddrFuncResult::Relative(RelativeAddress(result))
 }
 
 pub(crate) fn absolute(cpu: &mut Processor) -> AddrFuncResult {

@@ -4,16 +4,16 @@ use std::ops::AddAssign;
 use crate::*;
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
-pub struct AddressDiff(pub i8);
+pub struct RelativeAddress(pub i8);
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub struct Address(pub u16);
 
-impl Add<AddressDiff> for Address {
+impl Add<RelativeAddress> for Address {
     type Output = Address;
 
     // needs some work, but it will do for now.
-    fn add(self, AddressDiff(rhs): AddressDiff) -> Address {
+    fn add(self, RelativeAddress(rhs): RelativeAddress) -> Address {
         let Address(lhs) = self;
 
         let big_lhs = lhs as i32;
@@ -25,23 +25,23 @@ impl Add<AddressDiff> for Address {
     }
 }
 
-impl AddAssign<AddressDiff> for Address {
-    fn add_assign(&mut self, rhs: AddressDiff) {
+impl AddAssign<RelativeAddress> for Address {
+    fn add_assign(&mut self, rhs: RelativeAddress) {
         *self = *self + rhs
     }
 }
 
-impl Add<AddressDiff> for AddressDiff {
-    type Output = AddressDiff;
+impl Add<RelativeAddress> for RelativeAddress {
+    type Output = RelativeAddress;
 
-    fn add(self, AddressDiff(rhs): AddressDiff) -> AddressDiff {
-        let AddressDiff(lhs) = self;
-        AddressDiff(lhs + rhs)
+    fn add(self, RelativeAddress(rhs): RelativeAddress) -> RelativeAddress {
+        let RelativeAddress(lhs) = self;
+        RelativeAddress(lhs + rhs)
     }
 }
 
-impl AddAssign<AddressDiff> for AddressDiff {
-    fn add_assign(&mut self, rhs: AddressDiff) {
+impl AddAssign<RelativeAddress> for RelativeAddress {
+    fn add_assign(&mut self, rhs: RelativeAddress) {
         *self = *self + rhs
     }
 }
