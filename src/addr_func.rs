@@ -1,6 +1,6 @@
 use crate::*;
 
-pub(crate) fn accumulator(_: &mut Processor) -> AddrFuncResult {
+pub(crate) fn implied(_: &mut Processor) -> AddrFuncResult {
     AddrFuncResult::Implied
 }
 

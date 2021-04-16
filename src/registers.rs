@@ -3,11 +3,15 @@ use crate::*;
 pub trait Flags {
     fn get_negative(&self) -> bool;
     fn get_overflow(&self) -> bool;
+    fn get_break(&self) -> bool;
+    fn get_interrupt(&self) -> bool;
     fn get_zero(&self) -> bool;
     fn get_carry(&self) -> bool;
 
     fn set_negative(&mut self, value: Byte);
     fn set_overflow(&mut self, switch: bool);
+    fn set_break(&mut self, switch: bool);
+    fn set_interrupt(&mut self, switch: bool);
     fn set_zero(&mut self, value: Byte);
     fn set_carry(&mut self, switch: bool);
 
@@ -54,9 +58,9 @@ impl Default for Registers {
 pub const FLAG_NEGATIVE: u8 = 0b1000_0000;
 pub const FLAG_OVERFLOW: u8 = 0b0100_0000;
 pub const FLAG_UNUSED: u8 = 0b0010_0000;
-pub const FLAG_BRK: u8 = 0b0001_0000;
+pub const FLAG_BREAK: u8 = 0b0001_0000;
 pub const FLAG_DECIMAL_MODE: u8 = 0b0000_1000;
-pub const FLAG_DISABLE_INTERRUPTS: u8 = 0b0000_0100;
+pub const FLAG_INTERRUPT: u8 = 0b0000_0100;
 pub const FLAG_ZERO: u8 = 0b0000_0010;
 pub const FLAG_CARRY: u8 = 0b0000_0001;
 
@@ -67,6 +71,14 @@ impl Flags for Registers {
 
     fn get_overflow(&self) -> bool {
         self.status & FLAG_OVERFLOW == FLAG_OVERFLOW
+    }
+
+    fn get_break(&self) -> bool {
+        self.status & FLAG_BREAK == FLAG_BREAK
+    }
+
+    fn get_interrupt(&self) -> bool {
+        self.status & FLAG_INTERRUPT == FLAG_INTERRUPT
     }
 
     fn get_zero(&self) -> bool {
@@ -90,6 +102,22 @@ impl Flags for Registers {
             self.status |= FLAG_OVERFLOW
         } else {
             self.status &= !FLAG_OVERFLOW
+        }
+    }
+
+    fn set_break(&mut self, switch: bool) {
+        if switch {
+            self.status |= FLAG_BREAK
+        } else {
+            self.status &= !FLAG_BREAK
+        }
+    }
+
+    fn set_interrupt(&mut self, switch: bool) {
+        if switch {
+            self.status |= FLAG_INTERRUPT
+        } else {
+            self.status &= !FLAG_INTERRUPT
         }
     }
 

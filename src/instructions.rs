@@ -35,6 +35,16 @@ pub const BMI_RELATIVE: u8 = 0x30;
 
 pub const BNE_RELATIVE: u8 = 0xD0;
 
+pub const BPL_RELATIVE: u8 = 0x10;
+
+pub const BRK_IMPLIED: u8 = 0x00;
+
+pub const BVC_RELATIVE: u8 = 0x50;
+
+pub const BVS_RELATIVE: u8 = 0x70;
+
+pub const CLC_IMPLIED: u8 = 0x18;
+
 pub const INC_ZERO_PAGE: u8 = 0xE6;
 pub const INC_ZERO_PAGE_X: u8 = 0xF6;
 pub const INC_ABSOLUTE: u8 = 0xEE;
@@ -74,7 +84,7 @@ pub(crate) enum AddrFuncResult {
 use crate::*;
 
 pub(crate) const INSTRUCTION_CODE: [Option<(ExecFunc, AddrFunc)>; 256] = [
-    None,                                            // 0x00
+    Some((brk, implied)),                            // 0x00
     None,                                            // 0x01
     None,                                            // 0x02
     None,                                            // 0x03
@@ -84,13 +94,13 @@ pub(crate) const INSTRUCTION_CODE: [Option<(ExecFunc, AddrFunc)>; 256] = [
     None,                                            // 0x07
     None,                                            // 0x08
     None,                                            // 0x09
-    Some((asl, accumulator)),                        // 0x0A
+    Some((asl, implied)),                            // 0x0A
     None,                                            // 0x0B
     None,                                            // 0x0C
     None,                                            // 0x0D
     Some((asl, absolute)),                           // 0x0E
     None,                                            // 0x0F
-    None,                                            // 0x10
+    Some((bpl, relative)),                           // 0x10
     None,                                            // 0x11
     None,                                            // 0x12
     None,                                            // 0x13
@@ -98,7 +108,7 @@ pub(crate) const INSTRUCTION_CODE: [Option<(ExecFunc, AddrFunc)>; 256] = [
     None,                                            // 0x15
     Some((asl, zero_page_x)),                        // 0x16
     None,                                            // 0x17
-    None,                                            // 0x18
+    Some((clc, implied)),                            // 0x18
     None,                                            // 0x19
     None,                                            // 0x1A
     None,                                            // 0x1B
@@ -154,7 +164,7 @@ pub(crate) const INSTRUCTION_CODE: [Option<(ExecFunc, AddrFunc)>; 256] = [
     None,                                            // 0x4D
     None,                                            // 0x4E
     None,                                            // 0x4F
-    None,                                            // 0x50
+    Some((bvc, relative)),                           // 0x50
     None,                                            // 0x51
     None,                                            // 0x52
     None,                                            // 0x53
@@ -186,7 +196,7 @@ pub(crate) const INSTRUCTION_CODE: [Option<(ExecFunc, AddrFunc)>; 256] = [
     Some((adc, absolute)),                           // 0x6D
     None,                                            // 0x6E
     None,                                            // 0x6F
-    None,                                            // 0x70
+    Some((bvs, relative)),                           // 0x70
     Some((adc, indirect_indexed_y_more_if_crossed)), // 0x71
     None,                                            // 0x72
     None,                                            // 0x73

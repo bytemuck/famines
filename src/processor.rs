@@ -95,4 +95,36 @@ impl Processor {
             }
         }
     }
+
+    pub fn sp_to_address(&self) -> Address {
+        Address(STACK_BOTTOM | self.registers.sp as Word)
+    }
+
+    pub fn push_word_to_stack(&mut self, value: Word) {
+        self.write_byte((value >> 8) as u8, self.sp_to_address());
+        self.registers.sp -= 1;
+        self.write_byte((value & 0xFF) as u8, self.sp_to_address());
+        self.registers.sp -= 1;
+    }
+
+    pub fn push_pc_plus_one_to_stack(&mut self) {
+        self.push_word_to_stack(self.registers.pc.to_word() + 1);
+    }
+
+    pub fn push_pc_minus_one_to_stack(&mut self) {
+        self.push_word_to_stack(self.registers.pc.to_word() - 1);
+    }
+
+    pub fn push_status_to_stack(&mut self) {
+        let status_stack = self.registers.status | FLAG_BREAK;
+        self.push_byte_onto_stack(status_stack);
+    }
+
+    pub fn push_byte_onto_stack(&mut self, value: Byte) {
+        let sp_word = self.sp_to_address();
+        self.memory[sp_word.to_word()] = value;
+        self.cycles += 1;
+        self.registers.sp -= 1;
+        self.cycles += 1;
+    }
 }

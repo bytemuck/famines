@@ -120,6 +120,41 @@ pub(crate) fn bne(result: AddrFuncResult, cpu: &mut Processor) {
     }
 }
 
+pub(crate) fn bpl(result: AddrFuncResult, cpu: &mut Processor) {
+    if let AddrFuncResult::Relative(addr) = result {
+        cpu.branch_if(!cpu.registers.get_negative(), addr);
+    }
+}
+
+/* still not sure how to use break and interrupts, I feel like I need to read a little bit. */
+pub(crate) fn brk(result: AddrFuncResult, cpu: &mut Processor) {
+    cpu.push_pc_plus_one_to_stack();
+    cpu.push_status_to_stack();
+    let interrupt_vector = Address(BREAK_AND_INTERRUPT_REQUEST_HANDLER_BOTTOM);
+    cpu.registers.pc = Address(cpu.read_word(interrupt_vector));
+    cpu.registers.set_interrupt(true);
+    //cpu.registers.set_break(true); // idk why, but every reference i looked at set either both, interrupt or break idk what to do lmao
+}
+
+pub(crate) fn bvc(result: AddrFuncResult, cpu: &mut Processor) {
+    if let AddrFuncResult::Relative(addr) = result {
+        cpu.branch_if(!cpu.registers.get_overflow(), addr);
+    }
+}
+
+pub(crate) fn bvs(result: AddrFuncResult, cpu: &mut Processor) {
+    if let AddrFuncResult::Relative(addr) = result {
+        cpu.branch_if(cpu.registers.get_overflow(), addr);
+    }
+}
+
+pub(crate) fn clc(result: AddrFuncResult, cpu: &mut Processor) {
+    if let AddrFuncResult::Implied = result {
+        cpu.registers.set_carry(false);
+        cpu.cycles += 1;
+    }
+}
+
 pub(crate) fn inc(result: AddrFuncResult, cpu: &mut Processor) {
     if let AddrFuncResult::Address(addr) = result {
         let mut result = cpu.read_byte(addr);

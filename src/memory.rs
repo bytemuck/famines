@@ -4,6 +4,18 @@ use crate::*;
 
 const MEMORY_SIZE: usize = 0xFFFF + 1;
 
+pub const STACK_TOP: u16 = 0x01FF;
+pub const STACK_BOTTOM: u16 = 0x0100;
+
+pub const INTERRUPT_HANDLER_TOP: u16 = 0xFFFB;
+pub const INTERRUPT_HANDLER_BOTTOM: u16 = 0xFFFA;
+
+pub const POWER_ON_RESET_LOCATION_TOP: u16 = 0xFFFD;
+pub const POWER_ON_RESET_LOCATION_BOTTOM: u16 = 0xFFFC;
+
+pub const BREAK_AND_INTERRUPT_REQUEST_HANDLER_TOP: u16 = 0xFFFF;
+pub const BREAK_AND_INTERRUPT_REQUEST_HANDLER_BOTTOM: u16 = 0xFFFE;
+
 #[derive(Copy, Clone)]
 pub struct Memory {
     bytes: [u8; MEMORY_SIZE],
