@@ -118,6 +118,23 @@ pub const LDY_ZERO_PAGE_X: u8 = 0xB4;
 pub const LDY_ABSOLUTE: u8 = 0xAC;
 pub const LDY_ABSOLUTE_X: u8 = 0xBC;
 
+pub const LSR_ACCUMULATOR: u8 = 0x4A;
+pub const LSR_ZERO_PAGE: u8 = 0x46;
+pub const LSR_ZERO_PAGE_X: u8 = 0x56;
+pub const LSR_ABSOLUTE: u8 = 0x4E;
+pub const LSR_ABSOLUTE_X: u8 = 0x5E;
+
+pub const NOP_IMPLIED: u8 = 0xEA;
+
+pub const ORA_IMMEDIATE: u8 = 0x09;
+pub const ORA_ZERO_PAGE: u8 = 0x05;
+pub const ORA_ZERO_PAGE_X: u8 = 0x15;
+pub const ORA_ABSOLUTE: u8 = 0x0D;
+pub const ORA_ABSOLUTE_X: u8 = 0x1D;
+pub const ORA_ABSOLUTE_Y: u8 = 0x19;
+pub const ORA_INDIRECT_X: u8 = 0x01;
+pub const ORA_INDIRECT_Y: u8 = 0x11;
+
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub(crate) enum AddrFuncResult {
     Implied,
@@ -130,35 +147,35 @@ use crate::*;
 
 pub(crate) const INSTRUCTION_CODE: [Option<(ExecFunc, AddrFunc)>; 256] = [
     Some((brk, implied)),                            // 0x00
-    None,                                            // 0x01
+    Some((ora, indexed_indirect_x)),                 // 0x01
     None,                                            // 0x02
     None,                                            // 0x03
     None,                                            // 0x04
-    None,                                            // 0x05
+    Some((ora, zero_page)),                          // 0x05
     Some((asl, zero_page)),                          // 0x06
     None,                                            // 0x07
     None,                                            // 0x08
-    None,                                            // 0x09
+    Some((ora, immediate)),                          // 0x09
     Some((asl, implied)),                            // 0x0A
     None,                                            // 0x0B
     None,                                            // 0x0C
-    None,                                            // 0x0D
+    Some((ora, absolute)),                           // 0x0D
     Some((asl, absolute)),                           // 0x0E
     None,                                            // 0x0F
     Some((bpl, relative)),                           // 0x10
-    None,                                            // 0x11
+    Some((ora, indirect_indexed_y_more_if_crossed)), // 0x11
     None,                                            // 0x12
     None,                                            // 0x13
     None,                                            // 0x14
-    None,                                            // 0x15
+    Some((ora, zero_page_x)),                        // 0x15
     Some((asl, zero_page_x)),                        // 0x16
     None,                                            // 0x17
     Some((clc, implied)),                            // 0x18
-    None,                                            // 0x19
+    Some((ora, absolute_y_more_if_crossed)),         // 0x19
     None,                                            // 0x1A
     None,                                            // 0x1B
     None,                                            // 0x1C
-    None,                                            // 0x1D
+    Some((ora, absolute_x_more_if_crossed)),         // 0x1D
     Some((asl, absolute_x)),                         // 0x1E
     None,                                            // 0x1F
     Some((jsr, absolute)),                           // 0x20
@@ -199,15 +216,15 @@ pub(crate) const INSTRUCTION_CODE: [Option<(ExecFunc, AddrFunc)>; 256] = [
     None,                                            // 0x43
     None,                                            // 0x44
     Some((eor, zero_page)),                          // 0x45
-    None,                                            // 0x46
+    Some((lsr, zero_page)),                          // 0x46
     None,                                            // 0x47
     None,                                            // 0x48
     Some((eor, immediate)),                          // 0x49
-    None,                                            // 0x4A
+    Some((lsr, implied)),                            // 0x4A
     None,                                            // 0x4B
     None,                                            // 0x4C
     Some((eor, absolute)),                           // 0x4D
-    None,                                            // 0x4E
+    Some((lsr, absolute)),                           // 0x4E
     None,                                            // 0x4F
     Some((bvc, relative)),                           // 0x50
     Some((eor, indirect_indexed_y_more_if_crossed)), // 0x51
@@ -215,7 +232,7 @@ pub(crate) const INSTRUCTION_CODE: [Option<(ExecFunc, AddrFunc)>; 256] = [
     None,                                            // 0x53
     None,                                            // 0x54
     Some((eor, zero_page_x)),                        // 0x55
-    None,                                            // 0x56
+    Some((lsr, zero_page_x)),                        // 0x56
     None,                                            // 0x57
     Some((cli, implied)),                            // 0x58
     Some((eor, absolute_y_more_if_crossed)),         // 0x59
@@ -223,7 +240,7 @@ pub(crate) const INSTRUCTION_CODE: [Option<(ExecFunc, AddrFunc)>; 256] = [
     None,                                            // 0x5B
     None,                                            // 0x5C
     Some((eor, absolute_x_more_if_crossed)),         // 0x5D
-    None,                                            // 0x5E
+    Some((lsr, absolute_x)),                         // 0x5E
     None,                                            // 0x5F
     None,                                            // 0x60
     Some((adc, indexed_indirect_x)),                 // 0x61
@@ -363,7 +380,7 @@ pub(crate) const INSTRUCTION_CODE: [Option<(ExecFunc, AddrFunc)>; 256] = [
     None,                                            // 0xE7
     Some((inx, implied)),                            // 0xE8
     None,                                            // 0xE9
-    None,                                            // 0xEA
+    Some((nop, implied)),                            // 0xEA
     None,                                            // 0xEB
     Some((cpx, absolute)),                           // 0xEC
     None,                                            // 0xED

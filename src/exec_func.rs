@@ -281,7 +281,7 @@ pub(crate) fn eor(result: AddrFuncResult, cpu: &mut Processor) {
         }
         AddrFuncResult::Address(addr) => {
             cpu.registers.a ^= cpu.read_byte(addr);
-            dbg!(cpu.cycles);
+            cpu.cycles;
             cpu.registers
                 .set_negative(cpu.registers.a & FLAG_NEGATIVE > 0);
             cpu.registers.set_zero(cpu.registers.a == 0);
@@ -389,6 +389,59 @@ pub(crate) fn ldy(result: AddrFuncResult, cpu: &mut Processor) {
 
             cpu.registers.set_negative_y();
             cpu.registers.set_zero_y();
+        }
+        _ => {}
+    }
+}
+
+pub(crate) fn lsr(result: AddrFuncResult, cpu: &mut Processor) {
+    match result {
+        AddrFuncResult::Implied => {
+            cpu.registers.set_carry(cpu.registers.a & FLAG_CARRY > 0);
+            cpu.registers.a >>= 1;
+            cpu.cycles += 1;
+
+            cpu.registers
+                .set_negative(cpu.registers.a & FLAG_NEGATIVE > 0);
+            cpu.registers.set_zero(cpu.registers.a == 0);
+        }
+        AddrFuncResult::Address(addr) => {
+            let mut value = cpu.read_byte(addr);
+            cpu.registers.set_carry(value & FLAG_CARRY > 0);
+            value >>= 1;
+            cpu.cycles += 1;
+
+            cpu.write_byte(value, addr);
+
+            cpu.registers.set_negative(value & FLAG_NEGATIVE > 0);
+            cpu.registers.set_zero(value == 0);
+        }
+        _ => {}
+    }
+}
+
+pub(crate) fn nop(result: AddrFuncResult, cpu: &mut Processor) {
+    if let AddrFuncResult::Implied = result {
+        /* do nothing, no operator! */
+        cpu.cycles += 1;
+    }
+}
+
+pub(crate) fn ora(result: AddrFuncResult, cpu: &mut Processor) {
+    match result {
+        AddrFuncResult::Immediate(v) => {
+            cpu.registers.a |= v;
+
+            cpu.registers
+                .set_negative(cpu.registers.a & FLAG_NEGATIVE > 0);
+            cpu.registers.set_zero(cpu.registers.a == 0);
+        }
+        AddrFuncResult::Address(addr) => {
+            cpu.registers.a |= cpu.read_byte(addr);
+            cpu.cycles;
+            cpu.registers
+                .set_negative(cpu.registers.a & FLAG_NEGATIVE > 0);
+            cpu.registers.set_zero(cpu.registers.a == 0);
         }
         _ => {}
     }
