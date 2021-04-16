@@ -10,7 +10,7 @@ pub(crate) fn adc(result: AddrFuncResult, cpu: &mut Processor) {
             cpu.registers
                 .set_negative(before as Byte & FLAG_NEGATIVE > 0);
             cpu.registers.set_overflow_a(before as Byte, v);
-            cpu.registers.set_zero(before as Byte & FLAG_ZERO > 0);
+            cpu.registers.set_zero(before == 0);
             cpu.registers.set_carry(before > 0xFF);
         }
         AddrFuncResult::Address(addr) => {
@@ -23,7 +23,7 @@ pub(crate) fn adc(result: AddrFuncResult, cpu: &mut Processor) {
             cpu.registers
                 .set_negative(before as Byte & FLAG_NEGATIVE > 0);
             cpu.registers.set_overflow_a(before as Byte, v);
-            cpu.registers.set_zero(before as Byte & FLAG_ZERO > 0);
+            cpu.registers.set_zero(before == 0);
         }
         _ => {}
     }
@@ -59,7 +59,7 @@ pub(crate) fn asl(result: AddrFuncResult, cpu: &mut Processor) {
             cpu.cycles += 1;
 
             cpu.registers.set_negative(before & FLAG_NEGATIVE > 0);
-            cpu.registers.set_zero(before & FLAG_ZERO > 0);
+            cpu.registers.set_zero(before == 0);
 
             cpu.registers.a = before;
         }
@@ -71,10 +71,10 @@ pub(crate) fn asl(result: AddrFuncResult, cpu: &mut Processor) {
             value &= 0xFF;
             cpu.cycles += 1;
 
-            cpu.registers.set_negative(value & FLAG_NEGATIVE > 0);
-            cpu.registers.set_zero(value & FLAG_ZERO > 0);
-
             cpu.write_byte(value, addr);
+
+            cpu.registers.set_negative(value & FLAG_NEGATIVE > 0);
+            cpu.registers.set_zero(value == 0);
         }
         _ => {}
     }
@@ -103,7 +103,7 @@ pub(crate) fn bit(result: AddrFuncResult, cpu: &mut Processor) {
         let result = cpu.read_byte(addr);
 
         let anded = cpu.registers.a & result;
-        cpu.registers.set_zero(anded & FLAG_ZERO > 0);
+        cpu.registers.set_zero(anded == 0);
 
         cpu.registers.set_negative(result & FLAG_NEGATIVE > 0);
         cpu.registers.set_overflow(result & FLAG_OVERFLOW > 0)
@@ -197,6 +197,99 @@ pub(crate) fn cmp(result: AddrFuncResult, cpu: &mut Processor) {
     }
 }
 
+pub(crate) fn cpx(result: AddrFuncResult, cpu: &mut Processor) {
+    match result {
+        AddrFuncResult::Immediate(v) => {
+            let temp = cpu.registers.x - v;
+            cpu.registers.set_negative(temp & FLAG_NEGATIVE > 0);
+            cpu.registers.set_zero(cpu.registers.x == v);
+            cpu.registers.set_carry(cpu.registers.x >= v);
+        }
+        AddrFuncResult::Address(addr) => {
+            let v = cpu.read_byte(addr);
+            let temp = cpu.registers.x - v;
+            cpu.registers.set_negative(temp & FLAG_NEGATIVE > 0);
+            cpu.registers.set_zero(cpu.registers.x == v);
+            cpu.registers.set_carry(cpu.registers.x >= v);
+        }
+        _ => {}
+    }
+}
+
+pub(crate) fn cpy(result: AddrFuncResult, cpu: &mut Processor) {
+    match result {
+        AddrFuncResult::Immediate(v) => {
+            let temp = cpu.registers.y - v;
+            cpu.registers.set_negative(temp & FLAG_NEGATIVE > 0);
+            cpu.registers.set_zero(cpu.registers.y == v);
+            cpu.registers.set_carry(cpu.registers.y >= v);
+        }
+        AddrFuncResult::Address(addr) => {
+            let v = cpu.read_byte(addr);
+            let temp = cpu.registers.y - v;
+            cpu.registers.set_negative(temp & FLAG_NEGATIVE > 0);
+            cpu.registers.set_zero(cpu.registers.y == v);
+            cpu.registers.set_carry(cpu.registers.y >= v);
+        }
+        _ => {}
+    }
+}
+
+pub(crate) fn dec(result: AddrFuncResult, cpu: &mut Processor) {
+    if let AddrFuncResult::Address(addr) = result {
+        let mut result = cpu.read_byte(addr);
+        result -= 0x01;
+        cpu.cycles += 1;
+
+        cpu.write_byte(result, addr);
+
+        cpu.registers.set_negative(result & FLAG_NEGATIVE > 0);
+        cpu.registers.set_zero(result == 0);
+    }
+}
+
+pub(crate) fn dex(result: AddrFuncResult, cpu: &mut Processor) {
+    if let AddrFuncResult::Implied = result {
+        cpu.registers.x -= 0x01;
+        cpu.cycles += 1;
+
+        cpu.registers
+            .set_negative(dbg!(cpu.registers.x) & FLAG_NEGATIVE > 0);
+        cpu.registers.set_zero(cpu.registers.x == 0);
+    }
+}
+
+pub(crate) fn dey(result: AddrFuncResult, cpu: &mut Processor) {
+    if let AddrFuncResult::Implied = result {
+        cpu.registers.y -= 0x01;
+        cpu.cycles += 1;
+
+        cpu.registers
+            .set_negative(cpu.registers.y & FLAG_NEGATIVE > 0);
+        cpu.registers.set_zero(cpu.registers.y == 0);
+    }
+}
+
+pub(crate) fn eor(result: AddrFuncResult, cpu: &mut Processor) {
+    match result {
+        AddrFuncResult::Immediate(v) => {
+            cpu.registers.a ^= v;
+
+            cpu.registers
+                .set_negative(cpu.registers.a & FLAG_NEGATIVE > 0);
+            cpu.registers.set_zero(cpu.registers.a == 0);
+        }
+        AddrFuncResult::Address(addr) => {
+            cpu.registers.a ^= cpu.read_byte(addr);
+            dbg!(cpu.cycles);
+            cpu.registers
+                .set_negative(cpu.registers.a & FLAG_NEGATIVE > 0);
+            cpu.registers.set_zero(cpu.registers.a == 0);
+        }
+        _ => {}
+    }
+}
+
 pub(crate) fn inc(result: AddrFuncResult, cpu: &mut Processor) {
     if let AddrFuncResult::Address(addr) = result {
         let mut result = cpu.read_byte(addr);
@@ -206,7 +299,29 @@ pub(crate) fn inc(result: AddrFuncResult, cpu: &mut Processor) {
         cpu.write_byte(result, addr);
 
         cpu.registers.set_negative(result & FLAG_NEGATIVE > 0);
-        cpu.registers.set_zero(result & FLAG_ZERO > 0);
+        cpu.registers.set_zero(result == 0);
+    }
+}
+
+pub(crate) fn inx(result: AddrFuncResult, cpu: &mut Processor) {
+    if let AddrFuncResult::Implied = result {
+        cpu.registers.x += 0x01;
+        cpu.cycles += 1;
+
+        cpu.registers
+            .set_negative(cpu.registers.x & FLAG_NEGATIVE > 0);
+        cpu.registers.set_zero(cpu.registers.x == 0);
+    }
+}
+
+pub(crate) fn iny(result: AddrFuncResult, cpu: &mut Processor) {
+    if let AddrFuncResult::Implied = result {
+        cpu.registers.y += 0x01;
+        cpu.cycles += 1;
+
+        cpu.registers
+            .set_negative(cpu.registers.y & FLAG_NEGATIVE > 0);
+        cpu.registers.set_zero(cpu.registers.y == 0);
     }
 }
 
