@@ -85,6 +85,7 @@ pub(crate) fn zero_page_y(cpu: &mut Processor) -> AddrFuncResult {
 
 pub(crate) fn indexed_indirect_x(cpu: &mut Processor) -> AddrFuncResult {
     let address = cpu.fetch_byte() + cpu.registers.x;
+    cpu.cycles += 1;
     let address = cpu.read_word(Address(address.into()));
 
     AddrFuncResult::Address(Address(address))

@@ -108,11 +108,11 @@ impl Processor {
     }
 
     pub fn push_pc_plus_one_to_stack(&mut self) {
-        self.push_word_to_stack(self.registers.pc.to_word() + 1);
+        self.push_word_to_stack(self.registers.pc.to_word().wrapping_add(1));
     }
 
     pub fn push_pc_minus_one_to_stack(&mut self) {
-        self.push_word_to_stack(self.registers.pc.to_word() - 1);
+        self.push_word_to_stack(self.registers.pc.to_word().wrapping_sub(1));
     }
 
     pub fn push_status_to_stack(&mut self) {

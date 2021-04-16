@@ -176,6 +176,7 @@ pub(crate) fn jsr(result: AddrFuncResult, cpu: &mut Processor) {
         );
         cpu.registers.sp -= 2;
         cpu.registers.pc = addr;
+        cpu.cycles += 1;
     }
 }
 
