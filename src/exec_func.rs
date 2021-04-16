@@ -127,7 +127,7 @@ pub(crate) fn bpl(result: AddrFuncResult, cpu: &mut Processor) {
 }
 
 /* still not sure how to use break and interrupts, I feel like I need to read a little bit. */
-pub(crate) fn brk(result: AddrFuncResult, cpu: &mut Processor) {
+pub(crate) fn brk(_: AddrFuncResult, cpu: &mut Processor) {
     cpu.push_pc_plus_one_to_stack();
     cpu.push_status_to_stack();
     let interrupt_vector = Address(BREAK_AND_INTERRUPT_REQUEST_HANDLER_BOTTOM);
@@ -151,6 +151,13 @@ pub(crate) fn bvs(result: AddrFuncResult, cpu: &mut Processor) {
 pub(crate) fn clc(result: AddrFuncResult, cpu: &mut Processor) {
     if let AddrFuncResult::Implied = result {
         cpu.registers.set_carry(false);
+        cpu.cycles += 1;
+    }
+}
+
+pub(crate) fn cld(result: AddrFuncResult, cpu: &mut Processor) {
+    if let AddrFuncResult::Implied = result {
+        cpu.registers.set_decimal(false);
         cpu.cycles += 1;
     }
 }

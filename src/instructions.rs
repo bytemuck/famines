@@ -45,6 +45,8 @@ pub const BVS_RELATIVE: u8 = 0x70;
 
 pub const CLC_IMPLIED: u8 = 0x18;
 
+pub const CLD_IMPLIED: u8 = 0xD8;
+
 pub const INC_ZERO_PAGE: u8 = 0xE6;
 pub const INC_ZERO_PAGE_X: u8 = 0xF6;
 pub const INC_ABSOLUTE: u8 = 0xEE;
@@ -300,7 +302,7 @@ pub(crate) const INSTRUCTION_CODE: [Option<(ExecFunc, AddrFunc)>; 256] = [
     None,                                            // 0xD5
     None,                                            // 0xD6
     None,                                            // 0xD7
-    None,                                            // 0xD8
+    Some((cld, implied)),                            // 0xD8
     None,                                            // 0xD9
     None,                                            // 0xDA
     None,                                            // 0xDB
