@@ -4,6 +4,7 @@ pub trait Flags {
     fn get_negative(&self) -> bool;
     fn get_overflow(&self) -> bool;
     fn get_break(&self) -> bool;
+    fn get_decimal(&self) -> bool;
     fn get_interrupt(&self) -> bool;
     fn get_zero(&self) -> bool;
     fn get_carry(&self) -> bool;
@@ -11,6 +12,7 @@ pub trait Flags {
     fn set_negative(&mut self, value: Byte);
     fn set_overflow(&mut self, switch: bool);
     fn set_break(&mut self, switch: bool);
+    fn set_decimal(&mut self, switch: bool);
     fn set_interrupt(&mut self, switch: bool);
     fn set_zero(&mut self, value: Byte);
     fn set_carry(&mut self, switch: bool);
@@ -77,6 +79,10 @@ impl Flags for Registers {
         self.status & FLAG_BREAK == FLAG_BREAK
     }
 
+    fn get_decimal(&self) -> bool {
+        self.status & FLAG_DECIMAL_MODE == FLAG_DECIMAL_MODE
+    }
+
     fn get_interrupt(&self) -> bool {
         self.status & FLAG_INTERRUPT == FLAG_INTERRUPT
     }
@@ -110,6 +116,14 @@ impl Flags for Registers {
             self.status |= FLAG_BREAK
         } else {
             self.status &= !FLAG_BREAK
+        }
+    }
+
+    fn set_decimal(&mut self, switch: bool) {
+        if switch {
+            self.status |= FLAG_DECIMAL_MODE
+        } else {
+            self.status &= !FLAG_DECIMAL_MODE
         }
     }
 
