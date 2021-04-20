@@ -446,3 +446,23 @@ pub(crate) fn ora(result: AddrFuncResult, cpu: &mut Processor) {
         _ => {}
     }
 }
+
+pub(crate) fn pha(result: AddrFuncResult, cpu: &mut Processor) {
+    if let AddrFuncResult::Implied = result {
+        cpu.push_byte_onto_stack(cpu.registers.a);
+    }
+}
+
+pub(crate) fn php(result: AddrFuncResult, cpu: &mut Processor) {
+    if let AddrFuncResult::Implied = result {
+        cpu.push_byte_onto_stack(cpu.registers.status);
+    }
+}
+
+pub(crate) fn pla(result: AddrFuncResult, cpu: &mut Processor) {
+    if let AddrFuncResult::Implied = result {
+        cpu.registers.a = cpu.stack_pop();
+        cpu.registers.set_zero_a();
+        cpu.registers.set_negative_a();
+    }
+}

@@ -96,6 +96,24 @@ impl Processor {
         }
     }
 
+    pub fn stack_pop(&mut self) -> Byte {
+        if self.registers.sp == 0xFF {
+            self.registers.sp = 0x00;
+        } else {
+            self.registers.sp += 1;
+        }
+        self.read_byte(self.sp_to_address())
+    }
+
+    pub fn stack_push(&mut self, value: Byte) {
+        self.write_byte(value, self.sp_to_address());
+        if self.registers.sp == 0x00 {
+            self.registers.sp = 0xFF;
+        } else {
+            self.registers.sp -= 1;
+        }
+    }
+
     pub fn sp_to_address(&self) -> Address {
         Address(STACK_BOTTOM | self.registers.sp as Word)
     }

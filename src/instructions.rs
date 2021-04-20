@@ -135,6 +135,12 @@ pub const ORA_ABSOLUTE_Y: u8 = 0x19;
 pub const ORA_INDIRECT_X: u8 = 0x01;
 pub const ORA_INDIRECT_Y: u8 = 0x11;
 
+pub const PHA_IMPLIED: u8 = 0x48;
+
+pub const PHP_IMPLIED: u8 = 0x08;
+
+pub const PLA_IMPLIED: u8 = 0x68;
+
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub(crate) enum AddrFuncResult {
     Implied,
@@ -154,7 +160,7 @@ pub(crate) const INSTRUCTION_CODE: [Option<(ExecFunc, AddrFunc)>; 256] = [
     Some((ora, zero_page)),                          // 0x05
     Some((asl, zero_page)),                          // 0x06
     None,                                            // 0x07
-    None,                                            // 0x08
+    Some((php, implied)),                            // 0x08
     Some((ora, immediate)),                          // 0x09
     Some((asl, implied)),                            // 0x0A
     None,                                            // 0x0B
@@ -218,7 +224,7 @@ pub(crate) const INSTRUCTION_CODE: [Option<(ExecFunc, AddrFunc)>; 256] = [
     Some((eor, zero_page)),                          // 0x45
     Some((lsr, zero_page)),                          // 0x46
     None,                                            // 0x47
-    None,                                            // 0x48
+    Some((pha, implied)),                            // 0x48
     Some((eor, immediate)),                          // 0x49
     Some((lsr, implied)),                            // 0x4A
     None,                                            // 0x4B
@@ -250,7 +256,7 @@ pub(crate) const INSTRUCTION_CODE: [Option<(ExecFunc, AddrFunc)>; 256] = [
     Some((adc, zero_page)),                          // 0x65
     None,                                            // 0x66
     None,                                            // 0x67
-    None,                                            // 0x68
+    Some((pla, implied)),                            // 0x68
     Some((adc, immediate)),                          // 0x69
     None,                                            // 0x6A
     None,                                            // 0x6B
