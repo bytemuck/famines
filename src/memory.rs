@@ -18,7 +18,7 @@ pub const BREAK_AND_INTERRUPT_REQUEST_HANDLER_BOTTOM: u16 = 0xFFFE;
 
 #[derive(Copy, Clone)]
 pub struct Memory {
-    bytes: [u8; MEMORY_SIZE],
+    pub bytes: [u8; MEMORY_SIZE],
 }
 
 impl Default for Memory {
