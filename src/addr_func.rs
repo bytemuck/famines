@@ -85,9 +85,9 @@ pub(crate) fn zero_page_y(cpu: &mut Processor) -> AddrFuncResult {
 
 pub(crate) fn indexed_indirect_x(cpu: &mut Processor) -> AddrFuncResult {
     let address = cpu.fetch_byte() + cpu.registers.x;
-    cpu.cycles += 1;
     let address = cpu.read_word(Address(address.into()));
 
+    cpu.cycles += 1;
     AddrFuncResult::Address(Address(address))
 }
 
@@ -99,6 +99,15 @@ pub(crate) fn indirect_indexed_y_more_if_crossed(cpu: &mut Processor) -> AddrFun
     if address_y - address >= 0xFF {
         cpu.cycles += 1;
     }
+
+    AddrFuncResult::Address(Address(address_y))
+}
+
+pub(crate) fn indirect_indexed_y(cpu: &mut Processor) -> AddrFuncResult {
+    let address = cpu.fetch_byte();
+    let address = cpu.read_word(Address(address.into()));
+    let address_y = address + cpu.registers.y as Word;
+    cpu.cycles += 1;
 
     AddrFuncResult::Address(Address(address_y))
 }

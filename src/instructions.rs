@@ -141,6 +141,61 @@ pub const PHP_IMPLIED: u8 = 0x08;
 
 pub const PLA_IMPLIED: u8 = 0x68;
 
+pub const PLP_IMPLIED: u8 = 0x28;
+
+pub const ROL_ACCUMULATOR: u8 = 0x2A;
+pub const ROL_ZERO_PAGE: u8 = 0x26;
+pub const ROL_ZERO_PAGE_X: u8 = 0x36;
+pub const ROL_ABSOLUTE: u8 = 0x2E;
+pub const ROL_ABSOLUTE_X: u8 = 0x3E;
+
+pub const RTI_IMPLIED: u8 = 0x40;
+
+pub const RTS_IMPLIED: u8 = 0x60;
+
+pub const SBC_IMMEDIATE: u8 = 0xE9;
+pub const SBC_ZERO_PAGE: u8 = 0xE5;
+pub const SBC_ZERO_PAGE_X: u8 = 0xF5;
+pub const SBC_ABSOLUTE: u8 = 0xED;
+pub const SBC_ABSOLUTE_X: u8 = 0xFD;
+pub const SBC_ABSOLUTE_Y: u8 = 0xF9;
+pub const SBC_INDIRECT_X: u8 = 0xE1;
+pub const SBC_INDIRECT_Y: u8 = 0xF1;
+
+pub const SEC_IMPLIED: u8 = 0x38;
+
+pub const SED_IMPLIED: u8 = 0xF8;
+
+pub const SEI_IMPLIED: u8 = 0x78;
+
+pub const STA_ZERO_PAGE: u8 = 0x85;
+pub const STA_ZERO_PAGE_X: u8 = 0x95;
+pub const STA_ABSOLUTE: u8 = 0x8D;
+pub const STA_ABSOLUTE_X: u8 = 0x9D;
+pub const STA_ABSOLUTE_Y: u8 = 0x99;
+pub const STA_INDIRECT_X: u8 = 0x81;
+pub const STA_INDIRECT_Y: u8 = 0x91;
+
+pub const STX_ZERO_PAGE: u8 = 0x86;
+pub const STX_ZERO_PAGE_Y: u8 = 0x96;
+pub const STX_ABSOLUTE: u8 = 0x8E;
+
+pub const STY_ZERO_PAGE: u8 = 0x84;
+pub const STY_ZERO_PAGE_X: u8 = 0x94;
+pub const STY_ABSOLUTE: u8 = 0x8C;
+
+pub const TAX_IMPLIED: u8 = 0xAA;
+
+pub const TAY_IMPLIED: u8 = 0xA8;
+
+pub const TSX_IMPLIED: u8 = 0xBA;
+
+pub const TXA_IMPLIED: u8 = 0x8A;
+
+pub const TXS_IMPLIED: u8 = 0x9A;
+
+pub const TYA_IMPLIED: u8 = 0x98;
+
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub(crate) enum AddrFuncResult {
     Implied,
@@ -190,15 +245,15 @@ pub(crate) const INSTRUCTION_CODE: [Option<(ExecFunc, AddrFunc)>; 256] = [
     None,                                            // 0x23
     Some((bit, zero_page)),                          // 0x24
     Some((and, zero_page)),                          // 0x25
-    None,                                            // 0x26
+    Some((rol, zero_page)),                          // 0x26
     None,                                            // 0x27
-    None,                                            // 0x28
+    Some((plp, implied)),                            // 0x28
     Some((and, immediate)),                          // 0x29
-    None,                                            // 0x2A
+    Some((rol, implied)),                            // 0x2A
     None,                                            // 0x2B
     Some((bit, absolute)),                           // 0x2C
     Some((and, absolute)),                           // 0x2D
-    None,                                            // 0x2E
+    Some((rol, absolute)),                           // 0x2E
     None,                                            // 0x2F
     Some((bmi, relative)),                           // 0x30
     Some((and, indirect_indexed_y_more_if_crossed)), // 0x31
@@ -206,17 +261,17 @@ pub(crate) const INSTRUCTION_CODE: [Option<(ExecFunc, AddrFunc)>; 256] = [
     None,                                            // 0x33
     None,                                            // 0x34
     Some((and, zero_page_x)),                        // 0x35
-    None,                                            // 0x36
+    Some((rol, zero_page_x)),                        // 0x36
     None,                                            // 0x37
-    None,                                            // 0x38
+    Some((sec, implied)),                            // 0x38
     Some((and, absolute_y_more_if_crossed)),         // 0x39
     None,                                            // 0x3A
     None,                                            // 0x3B
     None,                                            // 0x3C
     Some((and, absolute_x_more_if_crossed)),         // 0x3D
-    None,                                            // 0x3E
+    Some((rol, absolute_x)),                         // 0x3E
     None,                                            // 0x3F
-    None,                                            // 0x40
+    Some((rti, implied)),                            // 0x40
     Some((eor, indexed_indirect_x)),                 // 0x41
     None,                                            // 0x42
     None,                                            // 0x43
@@ -248,7 +303,7 @@ pub(crate) const INSTRUCTION_CODE: [Option<(ExecFunc, AddrFunc)>; 256] = [
     Some((eor, absolute_x_more_if_crossed)),         // 0x5D
     Some((lsr, absolute_x)),                         // 0x5E
     None,                                            // 0x5F
-    None,                                            // 0x60
+    Some((rts, implied)),                            // 0x60
     Some((adc, indexed_indirect_x)),                 // 0x61
     None,                                            // 0x62
     None,                                            // 0x63
@@ -272,7 +327,7 @@ pub(crate) const INSTRUCTION_CODE: [Option<(ExecFunc, AddrFunc)>; 256] = [
     Some((adc, zero_page_x)),                        // 0x75
     None,                                            // 0x76
     None,                                            // 0x77
-    None,                                            // 0x78
+    Some((sei, implied)),                            // 0x78
     Some((adc, absolute_y_more_if_crossed)),         // 0x79
     None,                                            // 0x7A
     None,                                            // 0x7B
@@ -281,35 +336,35 @@ pub(crate) const INSTRUCTION_CODE: [Option<(ExecFunc, AddrFunc)>; 256] = [
     None,                                            // 0x7E
     None,                                            // 0x7F
     None,                                            // 0x80
-    None,                                            // 0x81
+    Some((sta, indexed_indirect_x)),                 // 0x81
     None,                                            // 0x82
     None,                                            // 0x83
-    None,                                            // 0x84
-    None,                                            // 0x85
-    None,                                            // 0x86
+    Some((sty, zero_page)),                          // 0x84
+    Some((sta, zero_page)),                          // 0x85
+    Some((stx, zero_page)),                          // 0x86
     None,                                            // 0x87
     Some((dey, implied)),                            // 0x88
     None,                                            // 0x89
-    None,                                            // 0x8A
+    Some((txa, implied)),                            // 0x8A
     None,                                            // 0x8B
-    None,                                            // 0x8C
-    None,                                            // 0x8D
-    None,                                            // 0x8E
+    Some((sty, absolute)),                           // 0x8C
+    Some((sta, absolute)),                           // 0x8D
+    Some((stx, absolute)),                           // 0x8E
     None,                                            // 0x8F
     Some((bcc, relative)),                           // 0x90
-    None,                                            // 0x91
+    Some((sta, indirect_indexed_y)),                 // 0x91
     None,                                            // 0x92
     None,                                            // 0x93
-    None,                                            // 0x94
-    None,                                            // 0x95
-    None,                                            // 0x96
+    Some((sty, zero_page_x)),                        // 0x94
+    Some((sta, zero_page_x)),                        // 0x95
+    Some((stx, zero_page_y)),                        // 0x96
     None,                                            // 0x97
-    None,                                            // 0x98
-    None,                                            // 0x99
-    None,                                            // 0x9A
+    Some((tya, implied)),                            // 0x98
+    Some((sta, absolute_y)),                         // 0x99
+    Some((txs, implied)),                            // 0x9A
     None,                                            // 0x9B
     None,                                            // 0x9C
-    None,                                            // 0x9D
+    Some((sta, absolute_x)),                         // 0x9D
     None,                                            // 0x9E
     None,                                            // 0x9F
     Some((ldy, immediate)),                          // 0xA0
@@ -320,9 +375,9 @@ pub(crate) const INSTRUCTION_CODE: [Option<(ExecFunc, AddrFunc)>; 256] = [
     Some((lda, zero_page)),                          // 0xA5
     Some((ldx, zero_page)),                          // 0xA6
     None,                                            // 0xA7
-    None,                                            // 0xA8
+    Some((tay, implied)),                            // 0xA8
     Some((lda, immediate)),                          // 0xA9
-    None,                                            // 0xAA
+    Some((tax, implied)),                            // 0xAA
     None,                                            // 0xAB
     Some((ldy, absolute)),                           // 0xAC
     Some((lda, absolute)),                           // 0xAD
@@ -338,7 +393,7 @@ pub(crate) const INSTRUCTION_CODE: [Option<(ExecFunc, AddrFunc)>; 256] = [
     None,                                            // 0xB7
     Some((clv, implied)),                            // 0xB8
     Some((lda, absolute_y_more_if_crossed)),         // 0xB9
-    None,                                            // 0xBA
+    Some((tsx, implied)),                            // 0xBA
     None,                                            // 0xBB
     Some((ldy, absolute_x_more_if_crossed)),         // 0xBC
     Some((lda, absolute_x_more_if_crossed)),         // 0xBD
@@ -377,35 +432,35 @@ pub(crate) const INSTRUCTION_CODE: [Option<(ExecFunc, AddrFunc)>; 256] = [
     Some((dec, absolute_x)),                         // 0xDE
     None,                                            // 0xDF
     Some((cpx, immediate)),                          // 0xE0
-    None,                                            // 0xE1
+    Some((sbc, indexed_indirect_x)),                 // 0xE1
     None,                                            // 0xE2
     None,                                            // 0xE3
     Some((cpx, zero_page)),                          // 0xE4
-    None,                                            // 0xE5
+    Some((sbc, zero_page)),                          // 0xE5
     Some((inc, zero_page)),                          // 0xE6
     None,                                            // 0xE7
     Some((inx, implied)),                            // 0xE8
-    None,                                            // 0xE9
+    Some((sbc, immediate)),                          // 0xE9
     Some((nop, implied)),                            // 0xEA
     None,                                            // 0xEB
     Some((cpx, absolute)),                           // 0xEC
-    None,                                            // 0xED
+    Some((sbc, absolute)),                           // 0xED
     Some((inc, absolute)),                           // 0xEE
     None,                                            // 0xEF
     Some((beq, relative)),                           // 0xF0
-    None,                                            // 0xF1
+    Some((sbc, indirect_indexed_y_more_if_crossed)), // 0xF1
     None,                                            // 0xF2
     None,                                            // 0xF3
     None,                                            // 0xF4
-    None,                                            // 0xF5
+    Some((sbc, zero_page_x)),                        // 0xF5
     Some((inc, zero_page_x)),                        // 0xF6
     None,                                            // 0xF7
-    None,                                            // 0xF8
-    None,                                            // 0xF9
+    Some((sed, implied)),                            // 0xF8
+    Some((sbc, absolute_y_more_if_crossed)),         // 0xF9
     None,                                            // 0xFA
     None,                                            // 0xFB
     None,                                            // 0xFC
-    None,                                            // 0xFD
+    Some((sbc, absolute_x_more_if_crossed)),         // 0xFD
     Some((inc, absolute_x)),                         // 0xFE
     None,                                            // 0xFF
 ];

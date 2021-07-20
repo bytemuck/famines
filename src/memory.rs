@@ -2,7 +2,7 @@ use std::usize;
 
 use crate::*;
 
-const MEMORY_SIZE: usize = 0xFFFF + 1;
+const MEMORY_SIZE: usize = 0xFFFF + 1; // 64 636 Bytes, 524 288 Bits
 
 pub const STACK_TOP: u16 = 0x01FF;
 pub const STACK_BOTTOM: u16 = 0x0100;

@@ -30,7 +30,7 @@ impl Processor {
 
     pub fn execute(&mut self, cycles_needed: u32) -> u32 {
         while self.cycles < cycles_needed {
-            self.run_instruction()
+            self.run_instruction();
         }
 
         self.cycles
@@ -96,26 +96,32 @@ impl Processor {
         }
     }
 
-    pub fn stack_pop(&mut self) -> Byte {
-        if self.registers.sp == 0xFF {
-            self.registers.sp = 0x00;
-        } else {
-            self.registers.sp += 1;
-        }
+    pub fn stack_pop_byte(&mut self) -> Byte {
+        self.registers.sp = u8::wrapping_add(self.registers.sp, 1);
+
         self.read_byte(self.sp_to_address())
     }
 
-    pub fn stack_push(&mut self, value: Byte) {
-        self.write_byte(value, self.sp_to_address());
-        if self.registers.sp == 0x00 {
-            self.registers.sp = 0xFF;
-        } else {
-            self.registers.sp -= 1;
-        }
+    pub fn stack_pop_word(&mut self) -> Word {
+        self.registers.sp = u8::wrapping_add(self.registers.sp, 1);
+        let value = self.read_word(self.sp_to_address());
+        self.registers.sp = u8::wrapping_add(self.registers.sp, 1);
+        value
     }
 
+    pub fn stack_push_byte(&mut self, value: Byte) {
+        self.write_byte(value, self.sp_to_address());
+        self.registers.sp -= 1;
+    }
+
+    pub fn stack_push_word(&mut self, value: Word) {
+        self.write_word(value, self.sp_to_address());
+        self.registers.sp -= 2;
+    }
+
+    // returns the address at which the stack pointer points as a full 16-bits word
     pub fn sp_to_address(&self) -> Address {
-        Address(STACK_BOTTOM | self.registers.sp as Word)
+        Address(STACK_BOTTOM | self.registers.sp as Word) // 0x01 | sp -> 0x01[sp]
     }
 
     pub fn push_word_to_stack(&mut self, value: Word) {
