@@ -124,15 +124,15 @@ impl Processor {
     }
 
     pub fn stack_pop_byte(&mut self) -> Byte {
-        self.registers.sp = u8::wrapping_add(self.registers.sp, 1);
+        self.registers.sp += 1;
 
         self.read_byte(self.sp_to_address())
     }
 
     pub fn stack_pop_word(&mut self) -> Word {
-        self.registers.sp = u8::wrapping_add(self.registers.sp, 1);
+        self.registers.sp += 1;
         let value = self.read_word(self.sp_to_address());
-        self.registers.sp = u8::wrapping_add(self.registers.sp, 1);
+        self.registers.sp += 1;
         value
     }
 
@@ -159,11 +159,11 @@ impl Processor {
     }
 
     pub fn push_pc_plus_one_to_stack(&mut self) {
-        self.push_word_to_stack(self.registers.pc.to_word().wrapping_add(1));
+        self.push_word_to_stack(self.registers.pc.to_word() + 1);
     }
 
     pub fn push_pc_minus_one_to_stack(&mut self) {
-        self.push_word_to_stack(self.registers.pc.to_word().wrapping_sub(1));
+        self.push_word_to_stack(self.registers.pc.to_word() - 1);
     }
 
     pub fn push_status_to_stack(&mut self) {
@@ -181,7 +181,7 @@ impl Processor {
         let sp_word = self.sp_to_address();
         self.memory[sp_word.to_word()] = value;
         self.cycles += 1;
-        self.registers.sp = self.registers.sp.wrapping_sub(1);
+        self.registers.sp -= 1;
         self.cycles += 1;
     }
 }

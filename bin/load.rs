@@ -1,5 +1,8 @@
 use emu6502::{Address, Processor};
 
+// this should panic because when it reaches the end of the program,
+// the program continue since there is no way to stop a cpu executing the next instruction
+// and the stack pointer overflow, if its printing "success!" we reached the end.
 fn main() {
     let mut processor = Processor::new();
     processor.registers.pc = Address(0x400);
