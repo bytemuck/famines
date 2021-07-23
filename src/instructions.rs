@@ -95,6 +95,9 @@ pub const INX_IMPLIED: u8 = 0xE8;
 
 pub const INY_IMPLIED: u8 = 0xC8;
 
+pub const JMP_ABSOLUTE: u8 = 0x4C;
+pub const JMP_INDIRECT: u8 = 0x6C;
+
 pub const JSR_ABSOLUTE: u8 = 0x20;
 
 pub const LDA_IMMEDIATE: u8 = 0xA9;
@@ -283,7 +286,7 @@ pub(crate) const INSTRUCTION_CODE: [Option<(ExecFunc, AddrFunc)>; 256] = [
     Some((eor, immediate)),                          // 0x49
     Some((lsr, implied)),                            // 0x4A
     None,                                            // 0x4B
-    None,                                            // 0x4C
+    Some((jmp, absolute)),                           // 0x4C
     Some((eor, absolute)),                           // 0x4D
     Some((lsr, absolute)),                           // 0x4E
     None,                                            // 0x4F
@@ -315,7 +318,7 @@ pub(crate) const INSTRUCTION_CODE: [Option<(ExecFunc, AddrFunc)>; 256] = [
     Some((adc, immediate)),                          // 0x69
     None,                                            // 0x6A
     None,                                            // 0x6B
-    None,                                            // 0x6C
+    Some((jmp, indirect)),                           // 0x6C
     Some((adc, absolute)),                           // 0x6D
     None,                                            // 0x6E
     None,                                            // 0x6F

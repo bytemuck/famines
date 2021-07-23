@@ -10,7 +10,7 @@ fn inx_implied() {
         processor.memory[0xFFFC] = INX_IMPLIED;
 
         let expected_cycles = 2;
-        let used_cycles = processor.execute(expected_cycles);
+        let used_cycles = processor.execute_cycles(expected_cycles);
 
         assert_eq!(processor.registers.x, 0x43);
         assert_eq!(used_cycles, expected_cycles);
@@ -27,7 +27,7 @@ fn inx_implied() {
         processor.memory[0xFFFC] = INX_IMPLIED;
 
         let expected_cycles = 2;
-        let used_cycles = processor.execute(expected_cycles);
+        let used_cycles = processor.execute_cycles(expected_cycles);
 
         assert_eq!(processor.registers.x, 0b1000_0000);
         assert_eq!(used_cycles, expected_cycles);

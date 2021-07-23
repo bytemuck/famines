@@ -11,7 +11,7 @@ fn bit_zero_page() {
     processor.memory[0x0042] = 0b1100_0000;
 
     let expected_cycles = 3;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(used_cycles, expected_cycles);
 
@@ -33,7 +33,7 @@ fn bit_absolute() {
     processor.memory[0x4242] = 0b1100_0000;
 
     let expected_cycles = 4;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(used_cycles, expected_cycles);
 

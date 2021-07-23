@@ -4,13 +4,21 @@ use emu6502::*;
 fn brk_implied() {
     let mut processor = Processor::new();
 
-    processor.memory[0xFFFC] = BRK_IMPLIED;
-    processor.memory[0xFFFE] = 0x00;
-    processor.memory[0xFFFF] = 0x80;
+    processor.registers.pc = Address(0xFF00);
+    processor.memory[0xFF00] = BRK_IMPLIED;
+    let oldsp = processor.registers.sp as u16;
+    let oldps = processor.registers.status as u16;
 
     let expected_cycles = 7;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(used_cycles, expected_cycles);
-    assert_eq!(processor.registers.pc, Address(0x8000));
+    assert_eq!(processor.memory[(0x0100 | oldsp) - 0], 0xFF);
+    assert_eq!(processor.memory[(0x0100 | oldsp) - 1], 0x02);
+    assert_eq!(
+        processor.memory[(0x0100 | oldsp) - 2],
+        oldps as u8 | FLAG_BREAK | FLAG_UNUSED
+    );
+
+    assert_eq!(processor.registers.get_interrupt(), true);
 }

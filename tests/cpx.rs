@@ -11,7 +11,7 @@ fn cpx_immediate() {
         processor.memory[0xFFFD] = 0x42;
 
         let expected_cycles = 2;
-        let used_cycles = processor.execute(expected_cycles);
+        let used_cycles = processor.execute_cycles(expected_cycles);
 
         assert_eq!(used_cycles, expected_cycles);
 
@@ -28,7 +28,7 @@ fn cpx_immediate() {
         processor.memory[0xFFFD] = 0x42;
 
         let expected_cycles = 2;
-        let used_cycles = processor.execute(expected_cycles);
+        let used_cycles = processor.execute_cycles(expected_cycles);
 
         assert_eq!(used_cycles, expected_cycles);
 
@@ -50,7 +50,7 @@ fn cpx_zero_page() {
         processor.memory[0x0042] = 0x67;
 
         let expected_cycles = 3;
-        let used_cycles = processor.execute(expected_cycles);
+        let used_cycles = processor.execute_cycles(expected_cycles);
 
         assert_eq!(used_cycles, expected_cycles);
 
@@ -68,7 +68,7 @@ fn cpx_zero_page() {
         processor.memory[0x0042] = 0x67;
 
         let expected_cycles = 3;
-        let used_cycles = processor.execute(expected_cycles);
+        let used_cycles = processor.execute_cycles(expected_cycles);
 
         assert_eq!(used_cycles, expected_cycles);
 
@@ -91,7 +91,7 @@ fn cpx_absolute() {
         processor.memory[0x4242] = 0x67;
 
         let expected_cycles = 4;
-        let used_cycles = processor.execute(expected_cycles);
+        let used_cycles = processor.execute_cycles(expected_cycles);
 
         assert_eq!(used_cycles, expected_cycles);
 
@@ -110,7 +110,7 @@ fn cpx_absolute() {
         processor.memory[0x4242] = 0x67;
 
         let expected_cycles = 4;
-        let used_cycles = processor.execute(expected_cycles);
+        let used_cycles = processor.execute_cycles(expected_cycles);
 
         assert_eq!(used_cycles, expected_cycles);
 

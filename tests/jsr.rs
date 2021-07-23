@@ -11,7 +11,7 @@ fn jsr_absolute() {
     processor.memory[0x4243] = 0x84;
 
     let expected_cycles = 8;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(processor.registers.a, 0x84);
     assert_eq!(used_cycles, expected_cycles);

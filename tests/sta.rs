@@ -10,7 +10,7 @@ fn sta_zero_page() {
     processor.memory[0xFFFD] = 0x16;
 
     let expected_cycles = 3;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(processor.memory[0x0016], 0x42);
     assert_eq!(used_cycles, expected_cycles);
@@ -27,7 +27,7 @@ fn sta_absolute() {
     processor.memory[0xFFFE] = 0x16;
 
     let expected_cycles = 4;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(processor.memory[0x1616], 0x42);
     assert_eq!(used_cycles, expected_cycles);
@@ -46,7 +46,7 @@ fn sta_indirect_x() {
     processor.memory[0x0007] = 0x80;
 
     let expected_cycles = 6;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(processor.memory[0x8000], 0x42);
     assert_eq!(used_cycles, expected_cycles);
@@ -65,7 +65,7 @@ fn sta_indirect_y() {
     processor.memory[0x8004] = 0x42; // 0x8000 + 0x04
 
     let expected_cycles = 6;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(processor.memory[0x8004], 0x42);
     assert_eq!(used_cycles, expected_cycles);

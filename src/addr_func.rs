@@ -41,7 +41,6 @@ pub(crate) fn absolute_x_more_if_crossed(cpu: &mut Processor) -> AddrFuncResult 
     AddrFuncResult::Address(Address(address_x))
 }
 
-#[allow(dead_code)]
 pub(crate) fn absolute_y(cpu: &mut Processor) -> AddrFuncResult {
     let address = cpu.fetch_word();
     let address_y = address + cpu.registers.y as Word;
@@ -83,8 +82,15 @@ pub(crate) fn zero_page_y(cpu: &mut Processor) -> AddrFuncResult {
     AddrFuncResult::Address(Address(address_y as Word))
 }
 
+pub(crate) fn indirect(cpu: &mut Processor) -> AddrFuncResult {
+    let mut address = cpu.fetch_word();
+    address = cpu.read_word(Address(address));
+
+    AddrFuncResult::Address(Address(address))
+}
+
 pub(crate) fn indexed_indirect_x(cpu: &mut Processor) -> AddrFuncResult {
-    let address = cpu.fetch_byte() + cpu.registers.x;
+    let address = u8::wrapping_add(cpu.fetch_byte(), cpu.registers.x);
     let address = cpu.read_word(Address(address.into()));
 
     cpu.cycles += 1;

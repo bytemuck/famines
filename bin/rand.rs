@@ -1,4 +1,4 @@
-use emu6502::Processor;
+use emu6502::{Address, Processor};
 use pixels::{Error, Pixels, SurfaceTexture};
 use rand::prelude::*;
 use winit::dpi::LogicalSize;
@@ -29,10 +29,14 @@ fn main() -> Result<(), Error> {
     };
 
     let mut processor = Processor::new();
+    processor.registers.pc = Address(0x0200); // starts at 0x0200
+
     let mut rng = rand::thread_rng();
 
+    let mut x: u32 = 0;
     for i in 0xA000..0xB000 {
-        processor.memory[i as u16] = rng.gen();
+        processor.memory[i as u16] = (x % 256) as u8;
+        x += 1;
     }
 
     event_loop.run(move |event, _, control_flow| {

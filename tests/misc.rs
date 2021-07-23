@@ -7,7 +7,7 @@ fn finish_instruction() {
     processor.memory[0xFFFC] = LDA_IMMEDIATE;
     processor.memory[0xFFFD] = 0x42;
 
-    let used_cycles = processor.execute(1);
+    let used_cycles = processor.execute_cycles(1);
 
     assert_eq!(used_cycles, 2);
 }
@@ -16,7 +16,7 @@ fn finish_instruction() {
 fn no_cycles() {
     let mut processor = Processor::new();
 
-    let used_cycles = processor.execute(0);
+    let used_cycles = processor.execute_cycles(0);
 
     assert_eq!(used_cycles, 0);
 }

@@ -22,7 +22,7 @@ fn and_immediate() {
     processor.memory[0xFFFD] = 0x42;
 
     let expected_cycles = 2;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(processor.registers.a, 0x32 & 0x42);
     assert_eq!(used_cycles, expected_cycles);
@@ -40,7 +40,7 @@ fn and_zero_page() {
     processor.memory[0x42] = 0x84;
 
     let expected_cycles = 3;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(processor.registers.a, 0x32 & 0x84);
     assert_eq!(used_cycles, expected_cycles);
@@ -60,7 +60,7 @@ fn and_zero_page_x() {
     processor.memory[0x007F] = 0x37;
 
     let expected_cycles = 4;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(processor.registers.a, 0x32 & 0x37);
     assert_eq!(used_cycles, expected_cycles);
@@ -79,7 +79,7 @@ fn and_absolute() {
     processor.memory[0x4480] = 0x37;
 
     let expected_cycles = 4;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(processor.registers.a, 0x32 & 0x37);
     assert_eq!(used_cycles, expected_cycles);
@@ -100,7 +100,7 @@ fn and_absolute_x() {
     processor.memory[0x4481] = 0x37;
 
     let expected_cycles = 4;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(processor.registers.a, 0x32 & 0x37);
     assert_eq!(used_cycles, expected_cycles);
@@ -121,7 +121,7 @@ fn and_absolute_x_crosses() {
     processor.memory[0x4501] = 0x37; // 0x4402+0xFF crosses page boundary!
 
     let expected_cycles = 5;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(processor.registers.a, 0x32 & 0x37);
     assert_eq!(used_cycles, expected_cycles);
@@ -141,7 +141,7 @@ fn and_absolute_y() {
     processor.memory[0x4481] = 0x37;
 
     let expected_cycles = 4;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(processor.registers.a, 0x32 & 0x37);
     assert_eq!(used_cycles, expected_cycles);
@@ -162,7 +162,7 @@ fn and_absolute_y_crosses() {
     processor.memory[0x4501] = 0x37; // 0x4402+0xFF crosses page boundary!
 
     let expected_cycles = 5;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(processor.registers.a, 0x32 & 0x37);
     assert_eq!(used_cycles, expected_cycles);
@@ -183,7 +183,7 @@ fn and_indirect_x() {
     processor.memory[0x8000] = 0x37;
 
     let expected_cycles = 6;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(processor.registers.a, 0x32 & 0x37);
     assert_eq!(used_cycles, expected_cycles);
@@ -204,7 +204,7 @@ fn and_indirect_y() {
     processor.memory[0x8004] = 0x37; // 0x8000 + 0x04
 
     let expected_cycles = 5;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(processor.registers.a, 0x32 & 0x37);
     assert_eq!(used_cycles, expected_cycles);
@@ -225,7 +225,7 @@ fn and_indirect_y_crosses() {
     processor.memory[0x8101] = 0x37; // 0x8000 + 0xFF
 
     let expected_cycles = 6;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(processor.registers.a, 0x32 & 0x37);
     assert_eq!(used_cycles, expected_cycles);

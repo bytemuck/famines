@@ -9,7 +9,7 @@ fn inc_zero_page() {
     processor.memory[0x0042] = 0x50;
 
     let expected_cycles = 5;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(processor.memory[0x0042], 0x50 + 0x01);
     assert_eq!(used_cycles, expected_cycles);
@@ -29,7 +29,7 @@ fn inc_zero_page_x() {
     processor.memory[0x0058] = 0x50;
 
     let expected_cycles = 6;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(processor.memory[0x0058], 0x50 + 0x01);
     assert_eq!(used_cycles, expected_cycles);
@@ -50,7 +50,7 @@ fn inc_absolute() {
     processor.memory[0x4242] = 0x50;
 
     let expected_cycles = 6;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(processor.memory[0x4242], 0x50 + 0x01);
     assert_eq!(used_cycles, expected_cycles);
@@ -71,7 +71,7 @@ fn inc_absolute_x() {
     processor.memory[0x4258] = 0x50;
 
     let expected_cycles = 7;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(processor.memory[0x4258], 0x50 + 0x01);
     assert_eq!(used_cycles, expected_cycles);

@@ -1,4 +1,7 @@
-use std::ops::{Add, AddAssign};
+use std::{
+    io::Write,
+    ops::{Add, AddAssign},
+};
 
 use crate::*;
 
@@ -28,16 +31,36 @@ impl Processor {
         *self = Self::new();
     }
 
-    pub fn execute(&mut self, cycles_needed: u32) -> u32 {
+    pub fn execute_cycles(&mut self, cycles_needed: u32) -> u32 {
+        let mut file = std::fs::File::create("output.txt").unwrap();
         while self.cycles < cycles_needed {
-            self.run_instruction();
+            self.run_instruction(&mut file);
         }
 
         self.cycles
     }
 
-    fn run_instruction(&mut self) {
+    pub fn execute(&mut self) {
+        let mut file = std::fs::File::create("output.txt").unwrap();
+
+        loop {
+            self.run_instruction(&mut file);
+        }
+    }
+
+    fn run_instruction(&mut self, file: &mut std::fs::File) {
+        let pc = self.registers.pc.to_word();
+        let status = self.registers.status;
+        let a = self.registers.a;
         let code = self.fetch_byte();
+
+        write!(
+            file,
+            "PC: ${:04x}\t\tCode: ${:02x}\t\t Status: {:08b}\t\t A: {:04x}\n",
+            pc, code, status, a
+        )
+        .unwrap();
+
         if let Some((exec_func, addr_func)) = INSTRUCTION_CODE[code as usize] {
             exec_func(addr_func(self), self);
         }
@@ -140,15 +163,21 @@ impl Processor {
     }
 
     pub fn push_status_to_stack(&mut self) {
-        let status_stack = self.registers.status | FLAG_BREAK;
-        self.push_byte_onto_stack(status_stack);
+        let status = self.registers.status | FLAG_BREAK | FLAG_UNUSED;
+        self.push_byte_onto_stack(status);
+    }
+
+    pub fn stack_pop_status(&mut self) {
+        self.registers.status = self.stack_pop_byte();
+        self.registers.set_break(false);
+        self.registers.set_unused(false);
     }
 
     pub fn push_byte_onto_stack(&mut self, value: Byte) {
         let sp_word = self.sp_to_address();
         self.memory[sp_word.to_word()] = value;
         self.cycles += 1;
-        self.registers.sp -= 1;
+        self.registers.sp = self.registers.sp.wrapping_sub(1);
         self.cycles += 1;
     }
 }

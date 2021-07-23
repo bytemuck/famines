@@ -12,7 +12,7 @@ fn nop_implied() {
     processor.memory[0xFFFF] = LSR_ACCUMULATOR;
 
     let expected_cycles = 8;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(processor.registers.a, 0b0110_0010);
     assert_eq!(used_cycles, expected_cycles);

@@ -14,3 +14,7 @@ rand = "0.8.4"
 [[bin]]
 name = "rand"
 path = "bin/rand.rs"
+
+[[bin]]
+name = "load"
+path = "bin/load.rs"

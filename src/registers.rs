@@ -11,6 +11,7 @@ pub trait Flags {
 
     fn set_negative(&mut self, switch: bool);
     fn set_overflow(&mut self, switch: bool);
+    fn set_unused(&mut self, switch: bool);
     fn set_break(&mut self, switch: bool);
     fn set_decimal(&mut self, switch: bool);
     fn set_interrupt(&mut self, switch: bool);
@@ -108,6 +109,14 @@ impl Flags for Registers {
             self.status |= FLAG_OVERFLOW;
         } else {
             self.status &= !FLAG_OVERFLOW;
+        }
+    }
+
+    fn set_unused(&mut self, switch: bool) {
+        if switch {
+            self.status |= FLAG_UNUSED;
+        } else {
+            self.status &= !FLAG_UNUSED;
         }
     }
 

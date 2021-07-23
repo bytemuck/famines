@@ -10,7 +10,7 @@ fn pla_implied() {
     processor.memory[0xFFFC] = PLA_IMPLIED; // 4 cycles
 
     let expected_cycles = 4;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(processor.registers.a, 0x42);
     assert_eq!(used_cycles, expected_cycles);

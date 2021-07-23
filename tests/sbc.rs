@@ -11,7 +11,7 @@ fn sbc_immediate() {
     processor.memory[0xFFFD] = 0x25;
 
     let expected_cycles = 2;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(processor.registers.a, ((0x23 - 0x25 - (1 - 0)) as i8) as u8);
     assert_eq!(used_cycles, expected_cycles);
@@ -33,7 +33,7 @@ fn sbc_absolute() {
     processor.memory[0x2525] = 0x32;
 
     let expected_cycles = 4;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(processor.registers.a, ((0x23 - 0x32 - (1 - 0)) as i8) as u8);
     assert_eq!(used_cycles, expected_cycles);

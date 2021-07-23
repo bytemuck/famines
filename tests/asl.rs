@@ -22,7 +22,7 @@ fn asl_accumulator() {
     processor.memory[0xFFFC] = ASL_ACCUMULATOR;
 
     let expected_cycles = 2;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(processor.registers.a, 0x32 << 1);
     assert_eq!(used_cycles, expected_cycles);
@@ -40,7 +40,7 @@ fn asl_zero_page() {
     processor.memory[0x0042] = 0x32;
 
     let expected_cycles = 5;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(processor.memory[0x0042], 0x32 << 1);
     assert_eq!(used_cycles, expected_cycles);
@@ -58,7 +58,7 @@ fn asl_zero_page_x() {
     processor.memory[0x00A4] = 0x32; // 0x42 + 0x62
 
     let expected_cycles = 6;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(processor.memory[0x00A4], 0x32 << 1);
     assert_eq!(used_cycles, expected_cycles);
@@ -77,7 +77,7 @@ fn asl_absolute() {
     processor.memory[0x4242] = 0x32;
 
     let expected_cycles = 6;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(processor.memory[0x4242], 0x32 << 1);
     assert_eq!(used_cycles, expected_cycles);
@@ -96,7 +96,7 @@ fn asl_absolute_x() {
     processor.memory[0x42A4] = 0x32; // 0x4242 + 0x62
 
     let expected_cycles = 7;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(processor.memory[0x42A4], 0x32 << 1);
     assert_eq!(used_cycles, expected_cycles);

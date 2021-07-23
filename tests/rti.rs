@@ -12,9 +12,9 @@ fn rti_implied() {
     processor.memory[0xFFFC] = RTI_IMPLIED;
 
     let expected_cycles = 6;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
-    assert_eq!(processor.registers.status, 0b1010_1010);
+    assert_eq!(processor.registers.status, 0b1000_1010);
     assert_eq!(processor.registers.sp, 0xFF);
     assert_eq!(processor.registers.pc, Address(0x4242));
     assert_eq!(used_cycles, expected_cycles);

@@ -10,7 +10,7 @@ fn ora_immediate() {
     processor.memory[0xFFFD] = 0x42;
 
     let expected_cycles = 2;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(used_cycles, expected_cycles);
 
@@ -31,7 +31,7 @@ fn ora_zero_page() {
     processor.memory[0x0066] = 0x42;
 
     let expected_cycles = 3;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(used_cycles, expected_cycles);
 
@@ -53,7 +53,7 @@ fn ora_zero_page_x() {
     processor.memory[0x0076] = 0x42;
 
     let expected_cycles = 4;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(used_cycles, expected_cycles);
 
@@ -75,7 +75,7 @@ fn ora_absolute() {
     processor.memory[0x6666] = 0x42;
 
     let expected_cycles = 4;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(used_cycles, expected_cycles);
 
@@ -98,7 +98,7 @@ fn ora_absolute_x() {
     processor.memory[0x6676] = 0x42;
 
     let expected_cycles = 4;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(used_cycles, expected_cycles);
 
@@ -121,7 +121,7 @@ fn ora_absolute_x_crosses() {
     processor.memory[0x6765] = 0x42;
 
     let expected_cycles = 5;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(used_cycles, expected_cycles);
 
@@ -144,7 +144,7 @@ fn ora_absolute_y() {
     processor.memory[0x6676] = 0x42;
 
     let expected_cycles = 4;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(used_cycles, expected_cycles);
 
@@ -167,7 +167,7 @@ fn ora_absolute_y_crosses() {
     processor.memory[0x6765] = 0x42;
 
     let expected_cycles = 5;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(used_cycles, expected_cycles);
 
@@ -191,7 +191,7 @@ fn ora_indirect_x() {
     processor.memory[0x8000] = 0x42;
 
     let expected_cycles = 6;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(processor.registers.a, 0x45 | 0x42);
     assert_eq!(used_cycles, expected_cycles);
@@ -214,7 +214,7 @@ fn ora_indirect_y() {
     processor.memory[0x8004] = 0x42;
 
     let expected_cycles = 5;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(processor.registers.a, 0x45 | 0x42);
     assert_eq!(used_cycles, expected_cycles);
@@ -237,7 +237,7 @@ fn ora_indirect_y_crosses() {
     processor.memory[0x8101] = 0x42; // 0x8002 + 0xFF
 
     let expected_cycles = 6;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(processor.registers.a, 0x45 | 0x42);
     assert_eq!(used_cycles, expected_cycles);

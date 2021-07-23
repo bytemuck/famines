@@ -17,7 +17,7 @@ fn negate8() {
     processor.memory[0x1004] = 0x01;
 
     let expected_cycles = 6 + 2 + 2 + 2;
-    let used_cycles = processor.execute(expected_cycles);
+    let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(processor.registers.a, (-32i8) as u8);
     assert_eq!(used_cycles, expected_cycles);
