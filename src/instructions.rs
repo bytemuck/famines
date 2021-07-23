@@ -152,6 +152,12 @@ pub const ROL_ZERO_PAGE_X: u8 = 0x36;
 pub const ROL_ABSOLUTE: u8 = 0x2E;
 pub const ROL_ABSOLUTE_X: u8 = 0x3E;
 
+pub const ROR_ACCUMULATOR: u8 = 0x6A;
+pub const ROR_ZERO_PAGE: u8 = 0x66;
+pub const ROR_ZERO_PAGE_X: u8 = 0x76;
+pub const ROR_ABSOLUTE: u8 = 0x6E;
+pub const ROR_ABSOLUTE_X: u8 = 0x7E;
+
 pub const RTI_IMPLIED: u8 = 0x40;
 
 pub const RTS_IMPLIED: u8 = 0x60;
@@ -312,15 +318,15 @@ pub(crate) const INSTRUCTION_CODE: [Option<(ExecFunc, AddrFunc)>; 256] = [
     None,                                            // 0x63
     None,                                            // 0x64
     Some((adc, zero_page)),                          // 0x65
-    None,                                            // 0x66
+    Some((ror, zero_page)),                          // 0x66
     None,                                            // 0x67
     Some((pla, implied)),                            // 0x68
     Some((adc, immediate)),                          // 0x69
-    None,                                            // 0x6A
+    Some((ror, implied)),                            // 0x6A
     None,                                            // 0x6B
     Some((jmp, indirect)),                           // 0x6C
     Some((adc, absolute)),                           // 0x6D
-    None,                                            // 0x6E
+    Some((ror, absolute)),                           // 0x6E
     None,                                            // 0x6F
     Some((bvs, relative)),                           // 0x70
     Some((adc, indirect_indexed_y_more_if_crossed)), // 0x71
@@ -328,7 +334,7 @@ pub(crate) const INSTRUCTION_CODE: [Option<(ExecFunc, AddrFunc)>; 256] = [
     None,                                            // 0x73
     None,                                            // 0x74
     Some((adc, zero_page_x)),                        // 0x75
-    None,                                            // 0x76
+    Some((ror, zero_page_x)),                        // 0x76
     None,                                            // 0x77
     Some((sei, implied)),                            // 0x78
     Some((adc, absolute_y_more_if_crossed)),         // 0x79
@@ -336,7 +342,7 @@ pub(crate) const INSTRUCTION_CODE: [Option<(ExecFunc, AddrFunc)>; 256] = [
     None,                                            // 0x7B
     None,                                            // 0x7C
     Some((adc, absolute_x_more_if_crossed)),         // 0x7D
-    None,                                            // 0x7E
+    Some((ror, absolute_x)),                         // 0x7E
     None,                                            // 0x7F
     None,                                            // 0x80
     Some((sta, indexed_indirect_x)),                 // 0x81

@@ -543,6 +543,42 @@ pub(crate) fn rol(result: AddrFuncResult, cpu: &mut Processor) {
     }
 }
 
+// plp uses [2, 5, 6, 6, 7] cycles, [fetch + addressing, and one cycle which can't really be simulated so we just do +1]
+pub(crate) fn ror(result: AddrFuncResult, cpu: &mut Processor) {
+    match result {
+        AddrFuncResult::Implied => {
+            let old_bit0 = (cpu.registers.a & FLAG_CARRY) > 0;
+            cpu.registers.a >>= 1;
+            if cpu.registers.get_carry() {
+                cpu.registers.a |= FLAG_NEGATIVE;
+            }
+            cpu.cycles += 1;
+
+            cpu.registers.set_carry(old_bit0);
+            cpu.registers.set_zero(cpu.registers.a == 0);
+            cpu.registers
+                .set_negative(cpu.registers.a & FLAG_NEGATIVE > 0);
+        }
+        AddrFuncResult::Address(addr) => {
+            let mut m = cpu.read_byte(addr);
+            let old_bit0 = (m & FLAG_CARRY) > 0;
+            m >>= 1;
+
+            if cpu.registers.get_carry() {
+                m |= FLAG_NEGATIVE;
+            }
+            cpu.cycles += 1;
+
+            cpu.write_byte(m, addr);
+
+            cpu.registers.set_carry(old_bit0);
+            cpu.registers.set_zero(m == 0);
+            cpu.registers.set_negative(m & FLAG_NEGATIVE > 0);
+        }
+        _ => {}
+    }
+}
+
 pub(crate) fn rti(result: AddrFuncResult, cpu: &mut Processor) {
     if let AddrFuncResult::Implied = result {
         cpu.registers.status = cpu.stack_pop_byte();
