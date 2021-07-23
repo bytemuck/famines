@@ -48,18 +48,22 @@ impl Processor {
         }
     }
 
-    fn run_instruction(&mut self, file: &mut std::fs::File) {
+    fn run_instruction(&mut self, _file: &mut std::fs::File) {
         let pc = self.registers.pc.to_word();
-        let status = self.registers.status;
-        let a = self.registers.a;
         let code = self.fetch_byte();
 
-        write!(
-            file,
-            "PC: ${:04x}\t\tCode: ${:02x}\t\t Status: {:08b}\t\t A: {:04x}\n",
-            pc, code, status, a
-        )
-        .unwrap();
+        // let status = self.registers.status;
+        // let a = self.registers.a;
+        // write!(
+        //     _file,
+        //     "PC: ${:04x}\t\tCode: ${:02x}\t\t Status: {:08b}\t\t A: {:04x}\n",
+        //     pc, code, status, a
+        // )
+        // .unwrap();
+
+        if pc == 3469 {
+            println!("success!");
+        }
 
         if let Some((exec_func, addr_func)) = INSTRUCTION_CODE[code as usize] {
             exec_func(addr_func(self), self);
