@@ -4,7 +4,7 @@ use emu6502::*;
 fn sec_implied() {
     let mut processor = Processor::new();
 
-    processor.registers.set_carry(false);
+    processor.registers.c = false;
 
     processor.memory[0xFFFC] = SEC_IMPLIED;
 
@@ -13,5 +13,5 @@ fn sec_implied() {
 
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_carry(), true);
+    assert_eq!(processor.registers.c, true);
 }

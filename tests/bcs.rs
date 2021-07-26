@@ -4,7 +4,7 @@ use emu6502::*;
 fn bcs_relative() {
     let mut processor = Processor::new();
 
-    processor.registers.set_carry(true);
+    processor.registers.c = true;
 
     processor.memory[0xFFFC] = BCS_RELATIVE;
     processor.memory[0xFFFD] = 0x1;
@@ -13,5 +13,5 @@ fn bcs_relative() {
     let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(used_cycles, expected_cycles);
-    assert_eq!(processor.registers.pc, Address(0xFFFF));
+    assert_eq!(processor.registers.pc, 0xFFFF);
 }

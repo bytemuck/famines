@@ -27,8 +27,8 @@ fn asl_accumulator() {
     assert_eq!(processor.registers.a, 0x32 << 1);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }
 
 #[test]
@@ -45,8 +45,8 @@ fn asl_zero_page() {
     assert_eq!(processor.memory[0x0042], 0x32 << 1);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }
 
 #[test]
@@ -63,8 +63,8 @@ fn asl_zero_page_x() {
     assert_eq!(processor.memory[0x00A4], 0x32 << 1);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }
 
 #[test]
@@ -82,8 +82,8 @@ fn asl_absolute() {
     assert_eq!(processor.memory[0x4242], 0x32 << 1);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }
 
 #[test]
@@ -101,6 +101,6 @@ fn asl_absolute_x() {
     assert_eq!(processor.memory[0x42A4], 0x32 << 1);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }

@@ -9,7 +9,9 @@ impl Adc for Processor {
         let mut p = Processor::new();
 
         if carry {
-            p.registers.status |= FLAG_CARRY;
+            let mut s = p.registers.to_byte();
+            s |= FLAG_CARRY;
+            p.registers.from_byte(s);
         }
 
         p.registers.a = 0x32;
@@ -31,8 +33,8 @@ fn adc_immediate() {
     assert_eq!(processor.registers.a, 0x32 + 0x42 + 0x01);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }
 
 #[test]
@@ -48,8 +50,8 @@ fn adc_immediate_carry_off() {
     assert_eq!(processor.registers.a, 0x32 + 0x42);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }
 
 #[test]
@@ -66,8 +68,8 @@ fn adc_zero_page() {
     assert_eq!(processor.registers.a, 0x32 + 0x52 + 0x01);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), true); // 133 is 0b1000_0101
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, true); // 133 is 0b1000_0101
 }
 
 #[test]
@@ -84,8 +86,8 @@ fn adc_zero_page_carry_off() {
     assert_eq!(processor.registers.a, 0x32 + 0x52);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), true); // 133 is 0b1000_0101
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, true); // 133 is 0b1000_0101
 }
 
 #[test]
@@ -104,8 +106,8 @@ fn adc_zero_page_x() {
     assert_eq!(processor.registers.a, 0x32 + 0x42 + 0x01);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }
 
 #[test]
@@ -124,8 +126,8 @@ fn adc_zero_page_x_carry_off() {
     assert_eq!(processor.registers.a, 0x32 + 0x42);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }
 
 #[test]
@@ -143,8 +145,8 @@ fn adc_absolute() {
     assert_eq!(processor.registers.a, 0x32 + 0x42 + 0x01);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }
 
 #[test]
@@ -162,8 +164,8 @@ fn adc_absolute_carry_off() {
     assert_eq!(processor.registers.a, 0x32 + 0x42);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }
 
 #[test]
@@ -183,8 +185,8 @@ fn adc_absolute_x() {
     assert_eq!(processor.registers.a, 0x32 + 0x42 + 0x01);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }
 
 #[test]
@@ -204,8 +206,8 @@ fn adc_absolute_x_carry_off() {
     assert_eq!(processor.registers.a, 0x32 + 0x42);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }
 
 #[test]
@@ -225,8 +227,8 @@ fn adc_absolute_x_crosses() {
     assert_eq!(processor.registers.a, 0x32 + 0x42 + 0x01);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }
 
 #[test]
@@ -246,8 +248,8 @@ fn adc_absolute_x_crosses_carry_off() {
     assert_eq!(processor.registers.a, 0x32 + 0x42);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }
 
 #[test]
@@ -267,8 +269,8 @@ fn adc_absolute_y() {
     assert_eq!(processor.registers.a, 0x32 + 0x42 + 0x01);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }
 
 #[test]
@@ -288,8 +290,8 @@ fn adc_absolute_y_carry_off() {
     assert_eq!(processor.registers.a, 0x32 + 0x42);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }
 
 #[test]
@@ -309,8 +311,8 @@ fn adc_absolute_y_crosses() {
     assert_eq!(processor.registers.a, 0x32 + 0x42 + 0x01);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }
 
 #[test]
@@ -330,8 +332,8 @@ fn adc_absolute_y_crosses_carry_off() {
     assert_eq!(processor.registers.a, 0x32 + 0x42);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }
 
 #[test]
@@ -352,8 +354,8 @@ fn adc_indirect_x() {
     assert_eq!(processor.registers.a, 0x32 + 0x42 + 0x01);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }
 
 #[test]
@@ -374,8 +376,8 @@ fn adc_indirect_x_carry_off() {
     assert_eq!(processor.registers.a, 0x32 + 0x42);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }
 
 #[test]
@@ -396,8 +398,8 @@ fn adc_indirect_y() {
     assert_eq!(processor.registers.a, 0x32 + 0x42 + 0x01);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }
 
 #[test]
@@ -418,8 +420,8 @@ fn adc_indirect_y_carry_off() {
     assert_eq!(processor.registers.a, 0x32 + 0x42);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }
 
 #[test]
@@ -440,8 +442,8 @@ fn adc_indirect_y_crosses() {
     assert_eq!(processor.registers.a, 0x32 + 0x42 + 0x01);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }
 
 #[test]
@@ -462,6 +464,6 @@ fn adc_indirect_y_crosses_carry_off() {
     assert_eq!(processor.registers.a, 0x32 + 0x42);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }

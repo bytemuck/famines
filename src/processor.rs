@@ -32,126 +32,108 @@ impl Processor {
     }
 
     pub fn execute_cycles(&mut self, cycles_needed: u32) -> u32 {
-        let mut file = std::fs::File::create("output.txt").unwrap();
         while self.cycles < cycles_needed {
-            self.run_instruction(&mut file);
+            self.run_instruction();
         }
 
         self.cycles
     }
 
     pub fn execute(&mut self) {
-        let mut file = std::fs::File::create("output.txt").unwrap();
-
         loop {
-            self.run_instruction(&mut file);
+            self.run_instruction();
         }
     }
 
-    fn run_instruction(&mut self, _file: &mut std::fs::File) {
-        let pc = self.registers.pc.to_word();
-        let code = self.fetch_byte();
-
-        // let status = self.registers.status;
-        // let a = self.registers.a;
-        // write!(
-        //     _file,
-        //     "PC: ${:04x}\t\tCode: ${:02x}\t\t Status: {:08b}\t\t A: {:04x}\n",
-        //     pc, code, status, a
-        // )
-        // .unwrap();
-
-        if pc == 3469 {
-            println!("success!");
-        }
-
-        if let Some((exec_func, addr_func)) = INSTRUCTION_CODE[code as usize] {
+    fn run_instruction(&mut self) {
+        if let Some((exec_func, addr_func)) = INSTRUCTION_CODE[self.fetch_byte() as usize] {
             exec_func(addr_func(self), self);
         }
     }
 
-    pub fn fetch_byte(&mut self) -> Byte {
+    pub fn fetch_byte(&mut self) -> u8 {
         let data = self.read_byte(self.registers.pc);
 
-        self.registers.pc += RelativeAddress(0x01);
+        self.registers.pc = u16::wrapping_add(self.registers.pc, 0x0001);
         data
     }
 
-    pub fn fetch_word(&mut self) -> Word {
+    pub fn fetch_word(&mut self) -> u16 {
         // 6502 is little endian
-        let mut data = self.read_byte(self.registers.pc) as Word;
-        self.registers.pc += RelativeAddress(0x01);
+        let mut data = self.read_byte(self.registers.pc) as u16;
+        self.registers.pc = u16::wrapping_add(self.registers.pc, 0x0001);
 
-        data |= (self.read_byte(self.registers.pc) as Word) << 8;
-        self.registers.pc += RelativeAddress(0x01);
+        data |= (self.read_byte(self.registers.pc) as u16) << 8;
+        self.registers.pc = u16::wrapping_add(self.registers.pc, 0x0001);
 
         data
     }
 
-    pub fn read_byte(&mut self, Address(address): Address) -> Byte {
+    pub fn read_byte(&mut self, u16: u16) -> u8 {
         self.cycles += 1;
-        self.memory[address]
+        self.memory[u16]
     }
 
-    pub fn read_word(&mut self, address: Address) -> Word {
-        let low = self.read_byte(address);
-        let high = self.read_byte(address + RelativeAddress(0x01));
+    pub fn read_word(&mut self, u16: u16) -> u16 {
+        let low = self.read_byte(u16);
+        let high = self.read_byte(u16 + 0x0001);
 
-        low as Word | (high as Word) << 8
+        low as u16 | (high as u16) << 8
     }
 
-    pub fn write_byte(&mut self, value: u8, address: Address) {
-        self.memory[address.to_word()] = value;
+    pub fn write_byte(&mut self, value: u8, addr: u16) {
+        self.memory[addr] = value;
         self.cycles += 1;
     }
 
-    pub fn write_word(&mut self, value: u16, address: Address) {
-        self.write_byte((value & 0xFF) as u8, address);
-        self.write_byte((value >> 8) as u8, address + RelativeAddress(1));
+    pub fn write_word(&mut self, value: u16, u16: u16) {
+        self.write_byte((value & 0xFF) as u8, u16);
+        self.write_byte((value >> 8) as u8, u16 + 0x0001);
     }
 
-    pub fn branch_if(&mut self, switch: bool, offset: RelativeAddress) {
+    pub fn branch_if(&mut self, switch: bool, offset: i8) {
         if switch {
             let pc_old = self.registers.pc;
-            self.registers.pc += offset;
+            self.registers.pc = (self.registers.pc as i32 + offset as i32) as u16;
+
             self.cycles += 1;
 
-            let page_changed = (self.registers.pc.to_word() >> 8) != (pc_old.to_word() >> 8);
+            let page_changed = (self.registers.pc >> 8) != (pc_old >> 8);
             if page_changed {
                 self.cycles += 1;
             }
         }
     }
 
-    pub fn stack_pop_byte(&mut self) -> Byte {
+    pub fn stack_pop_byte(&mut self) -> u8 {
         self.registers.sp += 1;
 
         self.read_byte(self.sp_to_address())
     }
 
-    pub fn stack_pop_word(&mut self) -> Word {
+    pub fn stack_pop_word(&mut self) -> u16 {
         self.registers.sp += 1;
         let value = self.read_word(self.sp_to_address());
         self.registers.sp += 1;
         value
     }
 
-    pub fn stack_push_byte(&mut self, value: Byte) {
+    pub fn stack_push_byte(&mut self, value: u8) {
         self.write_byte(value, self.sp_to_address());
         self.registers.sp -= 1;
     }
 
-    pub fn stack_push_word(&mut self, value: Word) {
+    pub fn stack_push_word(&mut self, value: u16) {
         self.write_word(value, self.sp_to_address());
         self.registers.sp -= 2;
     }
 
-    // returns the address at which the stack pointer points as a full 16-bits word
-    pub fn sp_to_address(&self) -> Address {
-        Address(STACK_BOTTOM | self.registers.sp as Word) // 0x01 | sp -> 0x01[sp]
+    // returns the u16 at which the stack pointer points as a full 16-bits u16
+    pub fn sp_to_address(&self) -> u16 {
+        STACK_BOTTOM | self.registers.sp as u16 // 0x01 | sp -> 0x01[sp]
     }
 
-    pub fn push_word_to_stack(&mut self, value: Word) {
+    pub fn push_word_to_stack(&mut self, value: u16) {
         self.write_byte((value >> 8) as u8, self.sp_to_address());
         self.registers.sp -= 1;
         self.write_byte((value & 0xFF) as u8, self.sp_to_address());
@@ -159,27 +141,28 @@ impl Processor {
     }
 
     pub fn push_pc_plus_one_to_stack(&mut self) {
-        self.push_word_to_stack(self.registers.pc.to_word() + 1);
+        self.push_word_to_stack(self.registers.pc + 0x0001);
     }
 
     pub fn push_pc_minus_one_to_stack(&mut self) {
-        self.push_word_to_stack(self.registers.pc.to_word() - 1);
+        self.push_word_to_stack(self.registers.pc - 0x0001);
     }
 
     pub fn push_status_to_stack(&mut self) {
-        let status = self.registers.status | FLAG_BREAK | FLAG_UNUSED;
+        let status = self.registers.to_byte() | FLAG_BREAK | FLAG_UNUSED;
         self.push_byte_onto_stack(status);
     }
 
     pub fn stack_pop_status(&mut self) {
-        self.registers.status = self.stack_pop_byte();
-        self.registers.set_break(false);
-        self.registers.set_unused(false);
+        let pop = self.stack_pop_byte();
+        self.registers.from_byte(pop);
+        self.registers.b = false;
+        self.registers.unused = false;
     }
 
-    pub fn push_byte_onto_stack(&mut self, value: Byte) {
+    pub fn push_byte_onto_stack(&mut self, value: u8) {
         let sp_word = self.sp_to_address();
-        self.memory[sp_word.to_word()] = value;
+        self.memory[sp_word] = value;
         self.cycles += 1;
         self.registers.sp -= 1;
         self.cycles += 1;

@@ -4,7 +4,7 @@ use emu6502::*;
 fn clv_implied() {
     let mut processor = Processor::new();
 
-    processor.registers.set_overflow(true);
+    processor.registers.v = true;
 
     processor.memory[0xFFFC] = CLV_IMPLIED;
 
@@ -13,5 +13,5 @@ fn clv_implied() {
 
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_overflow(), false);
+    assert_eq!(processor.registers.v, false);
 }

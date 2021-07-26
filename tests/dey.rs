@@ -13,6 +13,6 @@ fn dey_implied() {
     assert_eq!(processor.registers.y, 0x41);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }

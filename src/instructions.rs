@@ -205,12 +205,15 @@ pub const TXS_IMPLIED: u8 = 0x9A;
 
 pub const TYA_IMPLIED: u8 = 0x98;
 
+pub(crate) type ExecFunc = fn(AddrFuncResult, &mut Processor);
+pub(crate) type AddrFunc = fn(&mut Processor) -> AddrFuncResult;
+
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub(crate) enum AddrFuncResult {
     Implied,
-    Immediate(Byte),
-    Relative(RelativeAddress),
-    Address(Address),
+    Immediate(u8),
+    Relative(i8),
+    Address(u16),
 }
 
 use crate::*;

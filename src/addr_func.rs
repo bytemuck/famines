@@ -11,109 +11,109 @@ pub(crate) fn immediate(cpu: &mut Processor) -> AddrFuncResult {
 }
 
 pub(crate) fn relative(cpu: &mut Processor) -> AddrFuncResult {
-    let result = cpu.fetch_byte() as SByte;
+    let result = cpu.fetch_byte() as i8;
 
-    AddrFuncResult::Relative(RelativeAddress(result))
+    AddrFuncResult::Relative(result)
 }
 
 pub(crate) fn absolute(cpu: &mut Processor) -> AddrFuncResult {
-    let address = cpu.fetch_word();
+    let addr = cpu.fetch_word();
 
-    AddrFuncResult::Address(Address(address))
+    AddrFuncResult::Address(addr)
 }
 
 pub(crate) fn absolute_x(cpu: &mut Processor) -> AddrFuncResult {
-    let address = cpu.fetch_word();
-    let address_x = address + cpu.registers.x as Word;
+    let addr = cpu.fetch_word();
+    let addrx = addr + cpu.registers.x as u16;
     cpu.cycles += 1;
 
-    AddrFuncResult::Address(Address(address_x))
+    AddrFuncResult::Address(addrx)
 }
 
 pub(crate) fn absolute_x_more_if_crossed(cpu: &mut Processor) -> AddrFuncResult {
-    let address = cpu.fetch_word();
-    let address_x = address + cpu.registers.x as Word;
+    let addr = cpu.fetch_word();
+    let addrx = addr + cpu.registers.x as u16;
 
-    if address_x - address >= 0xFF {
+    if addrx - addr >= 0xFF {
         cpu.cycles += 1;
     }
 
-    AddrFuncResult::Address(Address(address_x))
+    AddrFuncResult::Address(addrx)
 }
 
 pub(crate) fn absolute_y(cpu: &mut Processor) -> AddrFuncResult {
-    let address = cpu.fetch_word();
-    let address_y = address + cpu.registers.y as Word;
+    let addr = cpu.fetch_word();
+    let addry = addr + cpu.registers.y as u16;
     cpu.cycles += 1;
 
-    AddrFuncResult::Address(Address(address_y))
+    AddrFuncResult::Address(addry)
 }
 
 pub(crate) fn absolute_y_more_if_crossed(cpu: &mut Processor) -> AddrFuncResult {
-    let address = cpu.fetch_word();
-    let address_y = address + cpu.registers.y as Word;
+    let addr = cpu.fetch_word();
+    let addry = addr + cpu.registers.y as u16;
 
-    if address_y - address >= 0xFF {
+    if addry - addr >= 0xFF {
         cpu.cycles += 1;
     }
 
-    AddrFuncResult::Address(Address(address_y))
+    AddrFuncResult::Address(addry)
 }
 
 pub(crate) fn zero_page(cpu: &mut Processor) -> AddrFuncResult {
-    let address = cpu.fetch_byte();
+    let addr = cpu.fetch_byte();
 
-    AddrFuncResult::Address(Address(address as Word))
+    AddrFuncResult::Address(addr as u16)
 }
 
 pub(crate) fn zero_page_x(cpu: &mut Processor) -> AddrFuncResult {
-    let address = cpu.fetch_byte();
-    let address_x = address.wrapping_add(cpu.registers.x);
+    let addr = cpu.fetch_byte();
+    let addrx = addr.wrapping_add(cpu.registers.x);
     cpu.cycles += 1;
 
-    AddrFuncResult::Address(Address(address_x as Word))
+    AddrFuncResult::Address(addrx as u16)
 }
 
 pub(crate) fn zero_page_y(cpu: &mut Processor) -> AddrFuncResult {
-    let address = cpu.fetch_byte();
-    let address_y = address.wrapping_add(cpu.registers.y);
+    let addr = cpu.fetch_byte();
+    let addry = addr.wrapping_add(cpu.registers.y);
     cpu.cycles += 1;
 
-    AddrFuncResult::Address(Address(address_y as Word))
+    AddrFuncResult::Address(addry as u16)
 }
 
 pub(crate) fn indirect(cpu: &mut Processor) -> AddrFuncResult {
-    let mut address = cpu.fetch_word();
-    address = cpu.read_word(Address(address));
+    let mut addr = cpu.fetch_word();
+    addr = cpu.read_word(addr);
 
-    AddrFuncResult::Address(Address(address))
+    AddrFuncResult::Address(addr)
 }
 
 pub(crate) fn indexed_indirect_x(cpu: &mut Processor) -> AddrFuncResult {
-    let address = u8::wrapping_add(cpu.fetch_byte(), cpu.registers.x);
-    let address = cpu.read_word(Address(address.into()));
+    let addr = u8::wrapping_add(cpu.fetch_byte(), cpu.registers.x);
+    let addr = cpu.read_word(addr as u16);
 
     cpu.cycles += 1;
-    AddrFuncResult::Address(Address(address))
+    AddrFuncResult::Address(addr)
 }
 
 pub(crate) fn indirect_indexed_y_more_if_crossed(cpu: &mut Processor) -> AddrFuncResult {
-    let address = cpu.fetch_byte();
-    let address = cpu.read_word(Address(address.into()));
-    let address_y = address + cpu.registers.y as Word;
+    let addr = cpu.fetch_byte();
+    let addr = cpu.read_word(addr as u16);
+    let addry = addr + cpu.registers.y as u16;
 
-    if address_y - address >= 0xFF {
+    if addry - addr >= 0xFF {
         cpu.cycles += 1;
     }
 
-    AddrFuncResult::Address(Address(address_y))
+    AddrFuncResult::Address(addry)
 }
 
 pub(crate) fn indirect_indexed_y(cpu: &mut Processor) -> AddrFuncResult {
-    let address = cpu.fetch_byte();
-    let address = cpu.read_word(Address(address.into()));
-    let address_y = address + cpu.registers.y as Word;
+    let addr = cpu.fetch_byte();
+    let addr = cpu.read_word(addr as u16);
+    let addry = addr + cpu.registers.y as u16;
     cpu.cycles += 1;
 
-    AddrFuncResult::Address(Address(address_y))
+    AddrFuncResult::Address(addry)
 }

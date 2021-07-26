@@ -4,7 +4,7 @@ use emu6502::*;
 fn cld_implied() {
     let mut processor = Processor::new();
 
-    processor.registers.set_decimal(true);
+    processor.registers.d = true;
 
     processor.memory[0xFFFC] = CLD_IMPLIED;
 
@@ -13,5 +13,5 @@ fn cld_implied() {
 
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_decimal(), false);
+    assert_eq!(processor.registers.d, false);
 }

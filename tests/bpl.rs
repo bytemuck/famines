@@ -13,9 +13,9 @@ fn bpl_relative() {
     let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(processor.registers.a, 0b0111_1111);
-    assert_eq!(processor.registers.pc, Address(0xFFF0)); // 0xFFFF + -16
+    assert_eq!(processor.registers.pc, 0xFFF0); // 0xFFFF + -16
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }

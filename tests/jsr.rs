@@ -16,6 +16,6 @@ fn jsr_absolute() {
     assert_eq!(processor.registers.a, 0x84);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), true);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, true);
 }

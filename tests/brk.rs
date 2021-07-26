@@ -4,10 +4,10 @@ use emu6502::*;
 fn brk_implied() {
     let mut processor = Processor::new();
 
-    processor.registers.pc = Address(0xFF00);
+    processor.registers.pc = 0xFF00;
     processor.memory[0xFF00] = BRK_IMPLIED;
     let oldsp = processor.registers.sp as u16;
-    let oldps = processor.registers.status as u16;
+    let oldps = processor.registers.to_byte() as u16;
 
     let expected_cycles = 7;
     let used_cycles = processor.execute_cycles(expected_cycles);
@@ -20,5 +20,5 @@ fn brk_implied() {
         oldps as u8 | FLAG_BREAK | FLAG_UNUSED
     );
 
-    assert_eq!(processor.registers.get_interrupt(), true);
+    assert_eq!(processor.registers.i, true);
 }

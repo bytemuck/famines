@@ -4,7 +4,7 @@ use emu6502::*;
 fn clc_implied() {
     let mut processor = Processor::new();
 
-    processor.registers.set_carry(true);
+    processor.registers.c = true;
 
     processor.memory[0xFFFC] = CLC_IMPLIED;
 
@@ -13,5 +13,5 @@ fn clc_implied() {
 
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_carry(), false);
+    assert_eq!(processor.registers.c, false);
 }

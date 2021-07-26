@@ -17,7 +17,7 @@ fn nop_implied() {
     assert_eq!(processor.registers.a, 0b0110_0010);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_negative(), false);
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_carry(), true);
+    assert_eq!(processor.registers.n, false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.c, true);
 }

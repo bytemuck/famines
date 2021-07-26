@@ -12,7 +12,7 @@ fn pha_implied() {
     let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(
-        processor.memory[processor.sp_to_address().to_word() + 1], // because the stack pointer decrement when you write a to the stack.
+        processor.memory[processor.sp_to_address() + 0x0001], // because the stack pointer decrement when you write a to the stack.
         0x42
     );
     assert_eq!(used_cycles, expected_cycles);

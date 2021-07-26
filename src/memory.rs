@@ -35,16 +35,16 @@ impl Memory {
     }
 }
 
-impl std::ops::Index<Word> for Memory {
-    type Output = Byte;
+impl std::ops::Index<u16> for Memory {
+    type Output = u8;
 
-    fn index(&self, index: Word) -> &<Self as std::ops::Index<Word>>::Output {
+    fn index(&self, index: u16) -> &<Self as std::ops::Index<u16>>::Output {
         &self.bytes[index as usize]
     }
 }
 
-impl std::ops::IndexMut<Word> for Memory {
-    fn index_mut(&mut self, index: Word) -> &mut <Self as std::ops::Index<Word>>::Output {
+impl std::ops::IndexMut<u16> for Memory {
+    fn index_mut(&mut self, index: u16) -> &mut <Self as std::ops::Index<u16>>::Output {
         &mut self.bytes[index as usize]
     }
 }

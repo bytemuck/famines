@@ -4,7 +4,7 @@ use emu6502::*;
 fn cli_implied() {
     let mut processor = Processor::new();
 
-    processor.registers.set_interrupt(true);
+    processor.registers.i = true;
 
     processor.memory[0xFFFC] = CLI_IMPLIED;
 
@@ -13,5 +13,5 @@ fn cli_implied() {
 
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_interrupt(), false);
+    assert_eq!(processor.registers.i, false);
 }

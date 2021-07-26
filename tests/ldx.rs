@@ -13,8 +13,8 @@ fn ldx_immediate() {
     assert_eq!(processor.registers.x, 0x42);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }
 
 #[test]
@@ -31,8 +31,8 @@ fn ldx_zero_page() {
     assert_eq!(processor.registers.x, 0x84);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), true);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, true);
 }
 
 #[test]
@@ -51,8 +51,8 @@ fn ldx_zero_page_y() {
     assert_eq!(processor.registers.x, 0x37);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }
 
 #[test]
@@ -70,8 +70,8 @@ fn ldx_absolute() {
     assert_eq!(processor.registers.x, 0x37);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }
 
 #[test]
@@ -91,8 +91,8 @@ fn ldx_absolute_y_crosses() {
     assert_eq!(processor.registers.x, 0x37);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }
 
 #[test]
@@ -111,6 +111,6 @@ fn ldx_absolute_y() {
     assert_eq!(processor.registers.x, 0x37);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }

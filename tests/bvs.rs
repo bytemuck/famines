@@ -4,7 +4,7 @@ use emu6502::*;
 fn bvs_relative() {
     let mut processor = Processor::new();
 
-    processor.registers.set_overflow(true);
+    processor.registers.v = true;
 
     processor.memory[0xFFFC] = LDA_IMMEDIATE; // 2 // place holder, NOP isn't implemented yet.
     processor.memory[0xFFFD] = 0b1000_0010; // place holder, NOP isn't implemented yet.
@@ -15,7 +15,7 @@ fn bvs_relative() {
     let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(used_cycles, expected_cycles);
-    assert_eq!(processor.registers.pc, Address(0xFFF0)); // 0xFFFF + -16
+    assert_eq!(processor.registers.pc, 0xFFF0); // 0xFFFF + -16
 
-    assert_eq!(processor.registers.get_overflow(), true);
+    assert_eq!(processor.registers.v, true);
 }

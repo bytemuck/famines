@@ -4,7 +4,7 @@ use emu6502::*;
 fn sed_implied() {
     let mut processor = Processor::new();
 
-    processor.registers.set_decimal(false);
+    processor.registers.d = false;
 
     processor.memory[0xFFFC] = SED_IMPLIED;
 
@@ -13,5 +13,5 @@ fn sed_implied() {
 
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_decimal(), true);
+    assert_eq!(processor.registers.d, true);
 }

@@ -4,7 +4,7 @@ use emu6502::*;
 fn sbc_immediate() {
     let mut processor = Processor::new();
 
-    processor.registers.set_carry(false);
+    processor.registers.c = false;
     processor.registers.a = 0x23;
 
     processor.memory[0xFFFC] = SBC_IMMEDIATE;
@@ -16,15 +16,15 @@ fn sbc_immediate() {
     assert_eq!(processor.registers.a, ((0x23 - 0x25 - (1 - 0)) as i8) as u8);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), true);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, true);
 }
 
 #[test]
 fn sbc_absolute() {
     let mut processor = Processor::new();
 
-    processor.registers.set_carry(false);
+    processor.registers.c = false;
     processor.registers.a = 0x23;
 
     processor.memory[0xFFFC] = SBC_ABSOLUTE;
@@ -38,6 +38,6 @@ fn sbc_absolute() {
     assert_eq!(processor.registers.a, ((0x23 - 0x32 - (1 - 0)) as i8) as u8);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), true);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, true);
 }

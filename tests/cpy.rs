@@ -15,9 +15,9 @@ fn cpy_immediate() {
 
         assert_eq!(used_cycles, expected_cycles);
 
-        assert_eq!(processor.registers.get_negative(), false);
-        assert_eq!(processor.registers.get_carry(), true);
-        assert_eq!(processor.registers.get_zero(), false);
+        assert_eq!(processor.registers.n, false);
+        assert_eq!(processor.registers.c, true);
+        assert_eq!(processor.registers.z, false);
     }
     {
         let mut processor = Processor::new();
@@ -32,9 +32,9 @@ fn cpy_immediate() {
 
         assert_eq!(used_cycles, expected_cycles);
 
-        assert_eq!(processor.registers.get_negative(), false);
-        assert_eq!(processor.registers.get_carry(), true);
-        assert_eq!(processor.registers.get_zero(), true);
+        assert_eq!(processor.registers.n, false);
+        assert_eq!(processor.registers.c, true);
+        assert_eq!(processor.registers.z, true);
     }
 }
 
@@ -54,9 +54,9 @@ fn cpy_zero_page() {
 
         assert_eq!(used_cycles, expected_cycles);
 
-        assert_eq!(processor.registers.get_negative(), false);
-        assert_eq!(processor.registers.get_carry(), true);
-        assert_eq!(processor.registers.get_zero(), false);
+        assert_eq!(processor.registers.n, false);
+        assert_eq!(processor.registers.c, true);
+        assert_eq!(processor.registers.z, false);
     }
     {
         let mut processor = Processor::new();
@@ -72,9 +72,9 @@ fn cpy_zero_page() {
 
         assert_eq!(used_cycles, expected_cycles);
 
-        assert_eq!(processor.registers.get_negative(), false);
-        assert_eq!(processor.registers.get_carry(), true);
-        assert_eq!(processor.registers.get_zero(), true);
+        assert_eq!(processor.registers.n, false);
+        assert_eq!(processor.registers.c, true);
+        assert_eq!(processor.registers.z, true);
     }
 }
 
@@ -95,9 +95,9 @@ fn cpy_absolute() {
 
         assert_eq!(used_cycles, expected_cycles);
 
-        assert_eq!(processor.registers.get_negative(), false);
-        assert_eq!(processor.registers.get_carry(), true);
-        assert_eq!(processor.registers.get_zero(), false);
+        assert_eq!(processor.registers.n, false);
+        assert_eq!(processor.registers.c, true);
+        assert_eq!(processor.registers.z, false);
     }
     {
         let mut processor = Processor::new();
@@ -114,8 +114,8 @@ fn cpy_absolute() {
 
         assert_eq!(used_cycles, expected_cycles);
 
-        assert_eq!(processor.registers.get_negative(), false);
-        assert_eq!(processor.registers.get_carry(), true);
-        assert_eq!(processor.registers.get_zero(), true);
+        assert_eq!(processor.registers.n, false);
+        assert_eq!(processor.registers.c, true);
+        assert_eq!(processor.registers.z, true);
     }
 }

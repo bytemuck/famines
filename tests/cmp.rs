@@ -15,9 +15,9 @@ fn cmp_immediate() {
 
         assert_eq!(used_cycles, expected_cycles);
 
-        assert_eq!(processor.registers.get_negative(), false);
-        assert_eq!(processor.registers.get_carry(), true);
-        assert_eq!(processor.registers.get_zero(), false);
+        assert_eq!(processor.registers.n, false);
+        assert_eq!(processor.registers.c, true);
+        assert_eq!(processor.registers.z, false);
     }
     {
         let mut processor = Processor::new();
@@ -32,9 +32,9 @@ fn cmp_immediate() {
 
         assert_eq!(used_cycles, expected_cycles);
 
-        assert_eq!(processor.registers.get_negative(), false);
-        assert_eq!(processor.registers.get_carry(), true);
-        assert_eq!(processor.registers.get_zero(), true);
+        assert_eq!(processor.registers.n, false);
+        assert_eq!(processor.registers.c, true);
+        assert_eq!(processor.registers.z, true);
     }
 }
 
@@ -54,9 +54,9 @@ fn cmp_zero_page() {
 
         assert_eq!(used_cycles, expected_cycles);
 
-        assert_eq!(processor.registers.get_negative(), false);
-        assert_eq!(processor.registers.get_carry(), true);
-        assert_eq!(processor.registers.get_zero(), false);
+        assert_eq!(processor.registers.n, false);
+        assert_eq!(processor.registers.c, true);
+        assert_eq!(processor.registers.z, false);
     }
     {
         let mut processor = Processor::new();
@@ -72,9 +72,9 @@ fn cmp_zero_page() {
 
         assert_eq!(used_cycles, expected_cycles);
 
-        assert_eq!(processor.registers.get_negative(), false);
-        assert_eq!(processor.registers.get_carry(), true);
-        assert_eq!(processor.registers.get_zero(), true);
+        assert_eq!(processor.registers.n, false);
+        assert_eq!(processor.registers.c, true);
+        assert_eq!(processor.registers.z, true);
     }
 }
 
@@ -95,9 +95,9 @@ fn cmp_zero_page_x() {
 
         assert_eq!(used_cycles, expected_cycles);
 
-        assert_eq!(processor.registers.get_negative(), false);
-        assert_eq!(processor.registers.get_carry(), true);
-        assert_eq!(processor.registers.get_zero(), false);
+        assert_eq!(processor.registers.n, false);
+        assert_eq!(processor.registers.c, true);
+        assert_eq!(processor.registers.z, false);
     }
     {
         let mut processor = Processor::new();
@@ -114,9 +114,9 @@ fn cmp_zero_page_x() {
 
         assert_eq!(used_cycles, expected_cycles);
 
-        assert_eq!(processor.registers.get_negative(), false);
-        assert_eq!(processor.registers.get_carry(), true);
-        assert_eq!(processor.registers.get_zero(), true);
+        assert_eq!(processor.registers.n, false);
+        assert_eq!(processor.registers.c, true);
+        assert_eq!(processor.registers.z, true);
     }
 }
 
@@ -137,9 +137,9 @@ fn cmp_absolute() {
 
         assert_eq!(used_cycles, expected_cycles);
 
-        assert_eq!(processor.registers.get_negative(), false);
-        assert_eq!(processor.registers.get_carry(), true);
-        assert_eq!(processor.registers.get_zero(), false);
+        assert_eq!(processor.registers.n, false);
+        assert_eq!(processor.registers.c, true);
+        assert_eq!(processor.registers.z, false);
     }
     {
         let mut processor = Processor::new();
@@ -156,9 +156,9 @@ fn cmp_absolute() {
 
         assert_eq!(used_cycles, expected_cycles);
 
-        assert_eq!(processor.registers.get_negative(), false);
-        assert_eq!(processor.registers.get_carry(), true);
-        assert_eq!(processor.registers.get_zero(), true);
+        assert_eq!(processor.registers.n, false);
+        assert_eq!(processor.registers.c, true);
+        assert_eq!(processor.registers.z, true);
     }
 }
 
@@ -180,9 +180,9 @@ fn cmp_absolute_x() {
 
         assert_eq!(used_cycles, expected_cycles);
 
-        assert_eq!(processor.registers.get_negative(), false);
-        assert_eq!(processor.registers.get_carry(), true);
-        assert_eq!(processor.registers.get_zero(), false);
+        assert_eq!(processor.registers.n, false);
+        assert_eq!(processor.registers.c, true);
+        assert_eq!(processor.registers.z, false);
     }
     {
         let mut processor = Processor::new();
@@ -200,9 +200,9 @@ fn cmp_absolute_x() {
 
         assert_eq!(used_cycles, expected_cycles);
 
-        assert_eq!(processor.registers.get_negative(), false);
-        assert_eq!(processor.registers.get_carry(), true);
-        assert_eq!(processor.registers.get_zero(), true);
+        assert_eq!(processor.registers.n, false);
+        assert_eq!(processor.registers.c, true);
+        assert_eq!(processor.registers.z, true);
     }
 }
 
@@ -224,9 +224,9 @@ fn cmp_absolute_y() {
 
         assert_eq!(used_cycles, expected_cycles);
 
-        assert_eq!(processor.registers.get_negative(), false);
-        assert_eq!(processor.registers.get_carry(), true);
-        assert_eq!(processor.registers.get_zero(), false);
+        assert_eq!(processor.registers.n, false);
+        assert_eq!(processor.registers.c, true);
+        assert_eq!(processor.registers.z, false);
     }
     {
         let mut processor = Processor::new();
@@ -244,9 +244,9 @@ fn cmp_absolute_y() {
 
         assert_eq!(used_cycles, expected_cycles);
 
-        assert_eq!(processor.registers.get_negative(), false);
-        assert_eq!(processor.registers.get_carry(), true);
-        assert_eq!(processor.registers.get_zero(), true);
+        assert_eq!(processor.registers.n, false);
+        assert_eq!(processor.registers.c, true);
+        assert_eq!(processor.registers.z, true);
     }
 }
 
@@ -269,9 +269,9 @@ fn cmp_indirect_x() {
 
         assert_eq!(used_cycles, expected_cycles);
 
-        assert_eq!(processor.registers.get_negative(), false);
-        assert_eq!(processor.registers.get_carry(), true);
-        assert_eq!(processor.registers.get_zero(), false);
+        assert_eq!(processor.registers.n, false);
+        assert_eq!(processor.registers.c, true);
+        assert_eq!(processor.registers.z, false);
     }
     {
         let mut processor = Processor::new();
@@ -290,9 +290,9 @@ fn cmp_indirect_x() {
 
         assert_eq!(used_cycles, expected_cycles);
 
-        assert_eq!(processor.registers.get_negative(), false);
-        assert_eq!(processor.registers.get_carry(), true);
-        assert_eq!(processor.registers.get_zero(), true);
+        assert_eq!(processor.registers.n, false);
+        assert_eq!(processor.registers.c, true);
+        assert_eq!(processor.registers.z, true);
     }
 }
 
@@ -315,9 +315,9 @@ fn cmp_indirect_y() {
 
         assert_eq!(used_cycles, expected_cycles);
 
-        assert_eq!(processor.registers.get_negative(), false);
-        assert_eq!(processor.registers.get_carry(), true);
-        assert_eq!(processor.registers.get_zero(), false);
+        assert_eq!(processor.registers.n, false);
+        assert_eq!(processor.registers.c, true);
+        assert_eq!(processor.registers.z, false);
     }
     {
         let mut processor = Processor::new();
@@ -336,9 +336,9 @@ fn cmp_indirect_y() {
 
         assert_eq!(used_cycles, expected_cycles);
 
-        assert_eq!(processor.registers.get_negative(), false);
-        assert_eq!(processor.registers.get_carry(), true);
-        assert_eq!(processor.registers.get_zero(), true);
+        assert_eq!(processor.registers.n, false);
+        assert_eq!(processor.registers.c, true);
+        assert_eq!(processor.registers.z, true);
     }
 }
 
@@ -361,9 +361,9 @@ fn cmp_indirect_y_crosses() {
 
         assert_eq!(used_cycles, expected_cycles);
 
-        assert_eq!(processor.registers.get_negative(), false);
-        assert_eq!(processor.registers.get_carry(), true);
-        assert_eq!(processor.registers.get_zero(), false);
+        assert_eq!(processor.registers.n, false);
+        assert_eq!(processor.registers.c, true);
+        assert_eq!(processor.registers.z, false);
     }
     {
         let mut processor = Processor::new();
@@ -382,8 +382,8 @@ fn cmp_indirect_y_crosses() {
 
         assert_eq!(used_cycles, expected_cycles);
 
-        assert_eq!(processor.registers.get_negative(), false);
-        assert_eq!(processor.registers.get_carry(), true);
-        assert_eq!(processor.registers.get_zero(), true);
+        assert_eq!(processor.registers.n, false);
+        assert_eq!(processor.registers.c, true);
+        assert_eq!(processor.registers.z, true);
     }
 }

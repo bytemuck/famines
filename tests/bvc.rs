@@ -13,5 +13,5 @@ fn bvc_relative() {
     let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(used_cycles, expected_cycles);
-    assert_eq!(processor.registers.pc, Address(0xFFF0)); // 0xFFFF + -16
+    assert_eq!(processor.registers.pc, 0xFFF0); // 0xFFFF + -16
 }

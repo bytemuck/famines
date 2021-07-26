@@ -13,8 +13,8 @@ fn lda_immediate() {
     assert_eq!(processor.registers.a, 0x42);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }
 
 #[test]
@@ -31,8 +31,8 @@ fn lda_zero_page() {
     assert_eq!(processor.registers.a, 0x84);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), true);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, true);
 }
 
 #[test]
@@ -51,8 +51,8 @@ fn lda_zero_page_x() {
     assert_eq!(processor.registers.a, 0x37);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }
 
 #[test]
@@ -70,8 +70,8 @@ fn lda_absolute() {
     assert_eq!(processor.registers.a, 0x37);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }
 
 #[test]
@@ -91,8 +91,8 @@ fn lda_absolute_x() {
     assert_eq!(processor.registers.a, 0x37);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }
 
 #[test]
@@ -112,8 +112,8 @@ fn lda_absolute_x_crosses() {
     assert_eq!(processor.registers.a, 0x37);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }
 
 #[test]
@@ -132,8 +132,8 @@ fn lda_absolute_y() {
     assert_eq!(processor.registers.a, 0x37);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }
 
 #[test]
@@ -153,8 +153,8 @@ fn lda_absolute_y_crosses() {
     assert_eq!(processor.registers.a, 0x37);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }
 
 #[test]
@@ -174,8 +174,8 @@ fn lda_indirect_x() {
     assert_eq!(processor.registers.a, 0x37);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }
 
 #[test]
@@ -195,8 +195,8 @@ fn lda_indirect_y() {
     assert_eq!(processor.registers.a, 0x37);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }
 
 #[test]
@@ -216,6 +216,6 @@ fn lda_indirect_y_crosses() {
     assert_eq!(processor.registers.a, 0x37);
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), false);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, false);
 }

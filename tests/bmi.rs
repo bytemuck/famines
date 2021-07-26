@@ -13,9 +13,9 @@ fn bmi_relative() {
     let used_cycles = processor.execute_cycles(expected_cycles);
 
     assert_eq!(processor.registers.a, 0b1000_0000);
-    assert_eq!(processor.registers.pc, Address(0xFFF0)); // 0xFFFF + -16
+    assert_eq!(processor.registers.pc, 0xFFF0); // 0xFFFF + -16
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_zero(), false);
-    assert_eq!(processor.registers.get_negative(), true);
+    assert_eq!(processor.registers.z, false);
+    assert_eq!(processor.registers.n, true);
 }

@@ -4,7 +4,7 @@ use emu6502::*;
 fn sei_implied() {
     let mut processor = Processor::new();
 
-    processor.registers.set_interrupt(false);
+    processor.registers.i = false;
 
     processor.memory[0xFFFC] = SEI_IMPLIED;
 
@@ -13,5 +13,5 @@ fn sei_implied() {
 
     assert_eq!(used_cycles, expected_cycles);
 
-    assert_eq!(processor.registers.get_interrupt(), true);
+    assert_eq!(processor.registers.i, true);
 }
