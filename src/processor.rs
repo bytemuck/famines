@@ -128,7 +128,7 @@ impl Processor {
         self.registers.sp -= 2;
     }
 
-    // returns the u16 at which the stack pointer points as a full 16-bits u16
+    // returns the address at which the stack pointer points as a full 16-bits address
     pub fn sp_to_address(&self) -> u16 {
         STACK_BOTTOM | self.registers.sp as u16 // 0x01 | sp -> 0x01[sp]
     }
