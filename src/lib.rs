@@ -1,19 +1,23 @@
 #![allow(unused_imports)]
 
-pub mod instructions;
-pub use instructions::*;
+pub mod operation;
+pub use operation::*;
 
 pub mod memory;
 pub use memory::*;
 
-pub mod processor;
-pub use processor::*;
+pub mod cpu;
+pub use cpu::*;
 
-pub mod registers;
-pub use registers::*;
+pub mod nes;
+pub use nes::*;
 
-pub mod addr_func;
-pub use addr_func::*;
+pub mod bus;
+pub use bus::*;
 
-pub mod exec_func;
-pub use exec_func::*;
+pub mod cartridge;
+pub use cartridge::*;
+
+pub mod status;
+pub use status::*;
+
